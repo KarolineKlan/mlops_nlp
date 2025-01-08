@@ -2,7 +2,18 @@ from pathlib import Path
 
 import typer
 from torch.utils.data import Dataset
+from torchtext.datasets import IMDB
 
+def load_raw_data() -> None:
+    print(f"Loading raw data from ...")
+    imdb_datapipe = IMDB(split="test")
+
+def preprocess(raw_data_path: Path, output_folder: Path) -> None:
+    print("Preprocessing data...")
+    imdb_batch_size = 3
+    imdb_datapipe = IMDB(split="test")
+    task = "sst2 sentence"
+    labels = {"1": "negative", "2": "positive"}
 
 class MyDataset(Dataset):
     """My custom dataset."""
