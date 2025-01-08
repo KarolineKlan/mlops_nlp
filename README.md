@@ -1,6 +1,6 @@
 # nlp
 
-This is the final project in the course 02476 Machine Learning Operations.
+This is the final project in the course 02476 Machine Learning Operations for group 42. This repository contains a project that uses the [IMDB dataset](https://pytorch.org/text/stable/datasets.html#imdb) to train a binary sentiment analysis model. The goal is to classify movie reviews as either positive or negative. The project demonstrates various aspects of Machine Learning Operations (MLOps), including data preprocessing, model training, evaluation, and deployment using Docker.
 
 ## Project structure
 
