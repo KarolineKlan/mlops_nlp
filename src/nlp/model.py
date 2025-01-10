@@ -23,7 +23,18 @@ class nlp_model(LightningModule):
         data, target = batch
         preds = self(data)
         loss = self.loss(preds, target)
+        acc = (target == preds.argmax(dim=-1)).float().mean()
+        self.log('train_loss', loss)
+        self.log('train_acc', acc)
         return loss
+    
+    def validation_step(self, batch) -> None:
+        data, target = batch
+        preds = self(data)
+        loss = self.criterion(preds, target)
+        acc = (target == preds.argmax(dim=-1)).float().mean()
+        self.log('val_loss', loss, on_epoch=True)
+        self.log('val_acc', acc, on_epoch=True)
     
     def configure_optimizers(self):
         return optim.Adam(self.parameters(), lr=self.lr)
