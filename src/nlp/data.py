@@ -34,7 +34,7 @@ class EmbeddingDataset(Dataset):
         """Compute embeddings for the dataset."""
         
         imdb = load_dataset("imdb")
-        train_valid_split = imdb["train"].shuffle(seed=self.seed).select(range(self.size)).train_test_split(test_size=0.2, seed=42)
+        train_valid_split = imdb["train"].shuffle(seed=self.seed).select(range(int(self.size))).train_test_split(test_size=0.2, seed=42)
         train_dataset = train_valid_split["train"]
         val_dataset = train_valid_split["test"]
 
@@ -58,10 +58,10 @@ class EmbeddingDataset(Dataset):
                 
         elif self.dataset_type == "test":
             try:
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(self.size))
+                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(int(self.size)))
             except:
                 logger.error("Error in loading the dataset. Index out of range.")
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(len(imdb[self.dataset_type]))
+                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(int(self.size)))
         
         tokenized = dataset.map(
             lambda x: self.tokenizer(x["text"], truncation=True, padding=True),
@@ -111,7 +111,7 @@ if __name__ == "__main__":
     val_embedding_save_path = "data/processed/val/embeddings.pt"
     test_embedding_save_path = "data/processed/test/embeddings.pt"
     
-    train_size = 3000
+    train_size = 500
 
     train_dataset = EmbeddingDataset(
         model_name=model_name,
@@ -141,7 +141,3 @@ if __name__ == "__main__":
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     
-
-    print(f"Dataset size: {len(dataset)}")
-    print(f"Sample embedding: {dataset[0][0].shape}")
-    print(f"Sample label: {dataset[0][1]}")
