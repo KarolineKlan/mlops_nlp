@@ -3,9 +3,9 @@ from torch import nn, optim
 import hydra
 from omegaconf import DictConfig
 
-class nlp_model(LightningModule):
+class NlpModel(LightningModule):
     def __init__(self, input_dim, config: DictConfig):
-        super(nlp_model, self).__init__()
+        super(NlpModel, self).__init__()
         self.lr = config.learning_rate
         self.classifier = nn.Sequential(
             nn.Linear(input_dim, 64),
