@@ -1,55 +1,92 @@
 from pathlib import Path
-
-import typer
 from torch.utils.data import Dataset
 from datasets import load_dataset
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModel
+import torch
 
 
-def load_raw_data(data_seed: int = 42, size: int = 3000, testratio: int = 0.1) -> None:
-    print(f"Loading raw data from ...")
-    imdb = load_dataset("imdb")
-    small_train_dataset = imdb["train"].shuffle(seed=data_seed).select([i for i in list(range(size))])
-    small_test_dataset = imdb["test"].shuffle(seed=data_seed).select([i for i in list(range(size*testratio))])
-    return small_train_dataset, small_test_dataset
+class EmbeddingDataset(Dataset):
+    """A dataset class that preprocesses and stores embeddings."""
 
-def preprocess(train_dataset, test_dataset, data_path:str) -> None:
-    print("Preprocessing data...")
-    # Prepare the text inputs for the model
-    def preprocess_function(examples):
-        return tokenizer(examples["text"], truncation=True)
-    
-    # tokenize and save data
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    tokenized_train = small_train_dataset.map(preprocess_function, batched=True)
-    tokenized_test = small_test_dataset.map(preprocess_function, batched=True)
+    def __init__(self, model_name: str, raw_data_path: str, embedding_save_path: str, size: int = 3000, seed: int = 42):
+        self.raw_data_path = raw_data_path
+        self.embedding_save_path = Path(embedding_save_path)
+        self.size = size
+        self.seed = seed
 
-    # Save the tokenized data to disk
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
+
+        if self.embedding_save_path.exists():
+            print(f"Loading precomputed embeddings from {self.embedding_save_path}")
+            self.embeddings, self.labels = torch.load(self.embedding_save_path)
+        else:
+            print("Computing embeddings from raw data...")
+            self.embeddings, self.labels = self._compute_embeddings()
+            self._save_embeddings()
+
+    def _compute_embeddings(self):
+        """Compute embeddings for the dataset."""
+        
+        imdb = load_dataset("imdb")
+        train_dataset = imdb["train"].shuffle(seed=self.seed).select(range(self.size))
+
+        
+        tokenized = train_dataset.map(
+            lambda x: self.tokenizer(x["text"], truncation=True, padding=True),
+            batched=True
+        )
+
+        embeddings = []
+        labels = []
+
+        with torch.no_grad():
+            for i in range(0, len(tokenized), 16):  
+                batch = tokenized[i: i + 16]  
+                input_ids = torch.tensor(batch["input_ids"])
+                attention_mask = torch.tensor(batch["attention_mask"])
+
+                input_ids = input_ids.to(self.model.device)
+                attention_mask = attention_mask.to(self.model.device)
+
+                outputs = self.model(input_ids, attention_mask=attention_mask)
+                cls_embedding = outputs.last_hidden_state[:, 0, :]  
+                embeddings.append(cls_embedding)
+                labels.extend(batch["label"])
+
+        
+        return torch.cat(embeddings), torch.tensor(labels)
 
 
+    def _save_embeddings(self):
+        """Save the computed embeddings to disk."""
+        self.embedding_save_path.parent.mkdir(parents=True, exist_ok=True)
+        torch.save((self.embeddings, self.labels), self.embedding_save_path)
+        print(f"Embeddings saved to {self.embedding_save_path}")
 
-    
-
-class MyDataset(Dataset):
-    """My custom dataset."""
-
-    def __init__(self, raw_data_path: Path) -> None:
-        self.data_path = raw_data_path
-
-    def __len__(self) -> int:
+    def __len__(self):
         """Return the length of the dataset."""
+        return len(self.embeddings)
 
-    def __getitem__(self, index: int):
-        """Return a given sample from the dataset."""
-
-    def preprocess(self, output_folder: Path) -> None:
-        """Preprocess the raw data and save it to the output folder."""
-
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
-    print("Preprocessing data...")
-    dataset = MyDataset(raw_data_path)
-    dataset.preprocess(output_folder)
+    def __getitem__(self, index):
+        """Return the embedding and label for a given index."""
+        return self.embeddings[index], self.labels[index]
 
 
 if __name__ == "__main__":
-    typer.run(preprocess)
+    
+    model_name = "distilbert-base-uncased"
+    raw_data_path = "data/raw"
+    embedding_save_path = "data/processed/embeddings.pt"
+
+    dataset = EmbeddingDataset(
+        model_name=model_name,
+        raw_data_path=raw_data_path,
+        embedding_save_path=embedding_save_path,
+        size=3000,
+        seed=42,
+    )
+
+    print(f"Dataset size: {len(dataset)}")
+    print(f"Sample embedding: {dataset[0][0].shape}")
+    print(f"Sample label: {dataset[0][1]}")
