@@ -2,18 +2,33 @@ from pathlib import Path
 
 import typer
 from torch.utils.data import Dataset
-from torchtext.datasets import IMDB
+from datasets import load_dataset
+from transformers import AutoTokenizer
 
-def load_raw_data() -> None:
+
+def load_raw_data(data_seed: int = 42, size: int = 3000, testratio: int = 0.1) -> None:
     print(f"Loading raw data from ...")
-    imdb_datapipe = IMDB(split="test")
+    imdb = load_dataset("imdb")
+    small_train_dataset = imdb["train"].shuffle(seed=data_seed).select([i for i in list(range(size))])
+    small_test_dataset = imdb["test"].shuffle(seed=data_seed).select([i for i in list(range(size*testratio))])
+    return small_train_dataset, small_test_dataset
 
-def preprocess(raw_data_path: Path, output_folder: Path) -> None:
+def preprocess(train_dataset, test_dataset, data_path:str) -> None:
     print("Preprocessing data...")
-    imdb_batch_size = 3
-    imdb_datapipe = IMDB(split="test")
-    task = "sst2 sentence"
-    labels = {"1": "negative", "2": "positive"}
+    # Prepare the text inputs for the model
+    def preprocess_function(examples):
+        return tokenizer(examples["text"], truncation=True)
+    
+    # tokenize and save data
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenized_train = small_train_dataset.map(preprocess_function, batched=True)
+    tokenized_test = small_test_dataset.map(preprocess_function, batched=True)
+
+    # Save the tokenized data to disk
+
+
+
+    
 
 class MyDataset(Dataset):
     """My custom dataset."""
