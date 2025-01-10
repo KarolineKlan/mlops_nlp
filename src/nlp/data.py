@@ -34,21 +34,33 @@ class EmbeddingDataset(Dataset):
         """Compute embeddings for the dataset."""
         
         imdb = load_dataset("imdb")
+        train_valid_split = imdb["train"].shuffle(seed=self.seed).select(range(self.size)).train_test_split(test_size=0.2, seed=42)
+        train_dataset = train_valid_split["train"]
+        val_dataset = train_valid_split["test"]
+
         
         if self.dataset_type == "train":
-            
+            dataset = train_dataset
             try:
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(self.size))
+                dataset = train_valid_split[self.dataset_type]
             except:
-                logging.error("Error in loading the dataset. Index out of range.")
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(len(imdb[self.dataset_type]))
+                logger.error("Error in loading the dataset. Index out of range.")
+                dataset = train_valid_split[self.dataset_type]
+                
+        elif self.dataset_type == "validation":
+            dataset = val_dataset
+            try:
+                dataset = train_valid_split["test"]
+            except:
+                logger.error("Error in loading the dataset. Index out of range.")
+                dataset = train_valid_split["test"]
                 
                 
         elif self.dataset_type == "test":
             try:
                 dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(self.size))
             except:
-                logging.error("Error in loading the dataset. Index out of range.")
+                logger.error("Error in loading the dataset. Index out of range.")
                 dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(len(imdb[self.dataset_type]))
         
         tokenized = dataset.map(
@@ -96,26 +108,38 @@ if __name__ == "__main__":
     
     model_name = "distilbert-base-uncased"
     train_embedding_save_path = "data/processed/train/embeddings.pt"
+    val_embedding_save_path = "data/processed/val/embeddings.pt"
     test_embedding_save_path = "data/processed/test/embeddings.pt"
+    
+    train_size = 3000
 
     train_dataset = EmbeddingDataset(
         model_name=model_name,
         embedding_save_path=train_embedding_save_path,
-        size=3000,
+        size=train_size,
         seed=42,
         dataset_type="train"
+    )
+    
+    val_dataset = EmbeddingDataset(
+        model_name=model_name,
+        embedding_save_path=val_embedding_save_path,
+        size=train_size,
+        seed=42,
+        dataset_type="validation"
     )
     
     test_dataset = EmbeddingDataset(
         model_name=model_name,
         embedding_save_path=test_embedding_save_path,
-        size=500,
+        size=train_size * 0.2,
         seed=42,
         dataset_type="test"
     )
 
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     
 
     print(f"Dataset size: {len(dataset)}")
