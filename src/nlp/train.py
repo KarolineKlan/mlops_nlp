@@ -36,33 +36,18 @@ def train_nlp_model(data_path: str = "data/processed",
     """
     logger.info("Initializing the dataset...")
 
-    train_dataset = EmbeddingDataset(
+    dataset = EmbeddingDataset(
         model_name=model_name,
-        embedding_save_path=os.join.path(data_path, "train/embeddings.pt"),
+        embedding_save_dir=data_path,
         size=train_size,
         seed=data_seed,
-        dataset_type="train"
-    )
-    
-    val_dataset = EmbeddingDataset(
-        model_name=model_name,
-        embedding_save_path=os.join.path(data_path, "val/embeddings.pt"),
-        size=train_size,
-        seed=data_seed,
-        dataset_type="validation"
-    )
-    
-    test_dataset = EmbeddingDataset(
-        model_name=model_name,
-        embedding_save_path=os.join.path(data_path, "test/embeddings.pt"),
-        size=train_size * 0.2,
-        seed=data_seed,
-        dataset_type="test"
+        test_ratio=0.2,     #TODO: Fix args so it's not hardcoded
+        val_ratio=0.2       #TODO: Fix args so it's not hardcoded
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(dataset.train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(dataset.val_dataset, batch_size=32, shuffle=False)
+    test_loader = DataLoader(dataset.test_dataset, batch_size=32, shuffle=False)
 
     logger.info("Initializing the model...")
     

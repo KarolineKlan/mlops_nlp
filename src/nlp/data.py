@@ -7,62 +7,70 @@ from torch.utils.data import DataLoader
 from loguru import logger
 from tqdm import tqdm
 
-
-class EmbeddingDataset(Dataset):
+class EmbeddingDataset:
     """A dataset class that preprocesses and stores embeddings."""
 
-    def __init__(self, model_name: str, embedding_save_path: str, size: int = 3000, seed: int = 42, dataset_type: str = "train"):
+    def __init__(self, model_name: str, embedding_save_dir: str = "data/processed", size: int = 3000, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2):
         """Initialize the dataset."""
-        
-        self.embedding_save_path = Path(embedding_save_path)
+        self.embedding_save_dir = Path(embedding_save_dir)
         self.size = size
         self.seed = seed
-        self.dataset_type = dataset_type
+        self.test_ratio = test_ratio
+        self.val_ratio = val_ratio
+        
+        self.imdb = load_dataset("imdb")
+        self.dataset_split = self.imdb["train"].shuffle(seed=self.seed).select(range(int(self.size))).train_test_split(test_size=self.val_ratio, seed=self.seed)
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
 
-        if self.embedding_save_path.exists():
-            print(f"Loading precomputed embeddings from {self.embedding_save_path}")
-            self.embeddings, self.labels = torch.load(self.embedding_save_path)
-        else:
-            logger.info("Computing embeddings for the dataset")
-            self.embeddings, self.labels = self._compute_embeddings()
-            self._save_embeddings()
-
-    def _compute_embeddings(self):
-        """Compute embeddings for the dataset."""
-        
-        imdb = load_dataset("imdb")
-        train_valid_split = imdb["train"].shuffle(seed=self.seed).select(range(int(self.size))).train_test_split(test_size=0.2, seed=42)
-        train_dataset = train_valid_split["train"]
-        val_dataset = train_valid_split["test"]
+        self.embedding_save_dir.mkdir(parents=True, exist_ok=True)
 
         
-        if self.dataset_type == "train":
-            dataset = train_dataset
-            try:
-                dataset = train_valid_split[self.dataset_type]
-            except:
-                logger.error("Error in loading the dataset. Index out of range.")
-                dataset = train_valid_split[self.dataset_type]
-                
-        elif self.dataset_type == "validation":
-            dataset = val_dataset
-            try:
-                dataset = train_valid_split["test"]
-            except:
-                logger.error("Error in loading the dataset. Index out of range.")
-                dataset = train_valid_split["test"]
-                
-                
-        elif self.dataset_type == "test":
-            try:
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(int(self.size)))
-            except:
-                logger.error("Error in loading the dataset. Index out of range.")
-                dataset = imdb[self.dataset_type].shuffle(seed=self.seed).select(range(int(self.size)))
+        self.train_embedding_path = self.embedding_save_dir / "train/embeddings.pt"
+        self.val_embedding_path = self.embedding_save_dir / "val/embeddings.pt"
+        self.test_embedding_path = self.embedding_save_dir / "test/embeddings.pt"
+
         
+        self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
+
+    def _load_or_compute_datasets(self):
+        """Load precomputed embeddings or compute them."""
+
+        datasets = {}
+
+        for dataset_type, save_path in zip([
+            "train", "validation", "test"
+        ], [
+            self.train_embedding_path, self.val_embedding_path, self.test_embedding_path
+        ]):
+
+            if save_path.exists():
+                logger.info(f"Loading computed {dataset_type} embeddings from {save_path}")
+                embeddings, labels = torch.load(save_path)
+            else:
+                logger.info(f"Computing {dataset_type} embeddings")
+                embeddings, labels = self._compute_embeddings(dataset_type)
+                torch.save((embeddings, labels), save_path)
+                logger.info(f"{dataset_type} embeddings saved to {save_path}")
+
+            datasets[dataset_type] = SimpleDataset(embeddings, labels)
+
+        return datasets["train"], datasets["validation"], datasets["test"]
+
+    def _compute_embeddings(self, dataset_type: str):
+        """Compute embeddings for a specific dataset type."""
+        
+        
+        
+
+        if dataset_type == "train":
+            dataset = self.dataset_split["train"]
+        elif dataset_type == "validation":
+            dataset = self.dataset_split["test"]
+        else:  
+            dataset = self.imdb["test"].shuffle(seed=self.seed).select(range(int(self.size * self.test_ratio)))
+
         tokenized = dataset.map(
             lambda x: self.tokenizer(x["text"], truncation=True, padding=True),
             batched=True
@@ -72,8 +80,8 @@ class EmbeddingDataset(Dataset):
         labels = []
 
         with torch.no_grad():
-            for i in tqdm(range(0, len(tokenized), 16)):  
-                batch = tokenized[i: i + 16]  
+            for i in tqdm(range(0, len(tokenized), 16), desc=f"Processing {dataset_type} embeddings"):
+                batch = tokenized[i: i + 16]
                 input_ids = torch.tensor(batch["input_ids"])
                 attention_mask = torch.tensor(batch["attention_mask"])
 
@@ -85,59 +93,40 @@ class EmbeddingDataset(Dataset):
                 embeddings.append(cls_embedding)
                 labels.extend(batch["label"])
 
-        
         return torch.cat(embeddings), torch.tensor(labels)
 
 
-    def _save_embeddings(self):
-        """Save the computed embeddings to disk."""
-        
-        self.embedding_save_path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save((self.embeddings, self.labels), self.embedding_save_path)
-        print(f"Embeddings saved to {self.embedding_save_path}")
+class SimpleDataset(Dataset):
+    """A simple Dataset wrapper for embeddings and labels."""
+
+    def __init__(self, embeddings, labels):
+        self.embeddings = embeddings
+        self.labels = labels
 
     def __len__(self):
-        """Return the length of the dataset."""
         return len(self.embeddings)
 
     def __getitem__(self, index):
-        """Return the embedding and label for a given index."""
         return self.embeddings[index], self.labels[index]
+
 
 if __name__ == "__main__":
     
+    #Example usage
+    
     model_name = "distilbert-base-uncased"
-    train_embedding_save_path = "data/processed/train/embeddings.pt"
-    val_embedding_save_path = "data/processed/val/embeddings.pt"
-    test_embedding_save_path = "data/processed/test/embeddings.pt"
-    
-    train_size = 500
+    embedding_save_dir = "data/processed"
+    dataset_size = 500
 
-    train_dataset = EmbeddingDataset(
+    dataset = EmbeddingDataset(
         model_name=model_name,
-        embedding_save_path=train_embedding_save_path,
-        size=train_size,
+        embedding_save_dir=embedding_save_dir,
+        size=dataset_size,
         seed=42,
-        dataset_type="train"
-    )
-    
-    val_dataset = EmbeddingDataset(
-        model_name=model_name,
-        embedding_save_path=val_embedding_save_path,
-        size=train_size,
-        seed=42,
-        dataset_type="validation"
-    )
-    
-    test_dataset = EmbeddingDataset(
-        model_name=model_name,
-        embedding_save_path=test_embedding_save_path,
-        size=train_size * 0.2,
-        seed=42,
-        dataset_type="test"
+        test_ratio=0.2,
+        val_ratio=0.2
     )
 
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-    
+    train_loader = DataLoader(dataset.train_dataset, batch_size=32, shuffle=True)
+    val_loader = DataLoader(dataset.val_dataset, batch_size=32, shuffle=False)
+    test_loader = DataLoader(dataset.test_dataset, batch_size=32, shuffle=False)
