@@ -6,7 +6,7 @@ from omegaconf import DictConfig
 class nlp_model(LightningModule):
     def __init__(self, input_dim, config: DictConfig):
         super(nlp_model, self).__init__()
-        self.lr = config.learning_rate
+        self.lr = config["model"]["learning_rate"]
         self.classifier = nn.Sequential(
             nn.Linear(input_dim, 64),
             nn.LeakyReLU(),
@@ -14,7 +14,7 @@ class nlp_model(LightningModule):
             nn.Dropout(),
             nn.Softmax()
         )    
-        self.loss = nn.CrossEntropyLoss()
+        self.criterion = nn.CrossEntropyLoss()
         
     def forward(self, x):
         return self.classifier(x)
@@ -22,11 +22,19 @@ class nlp_model(LightningModule):
     def training_step(self,batch,batch_idx):
         data, target = batch
         preds = self(data)
-        loss = self.loss(preds, target)
+        loss = self.criterion(preds, target)
         acc = (target == preds.argmax(dim=-1)).float().mean()
         self.log('train_loss', loss)
         self.log('train_acc', acc)
         return loss
+    def test_step(self, batch, batch_idx):
+        data, target = batch
+        preds = self(data)
+        loss = self.criterion(preds, target) 
+        acc = (target == preds.argmax(dim=-1)).float().mean()        
+        self.log('test_loss', loss, on_epoch=True, prog_bar=True)
+        self.log('test_acc', acc, on_epoch=True, prog_bar=True)
+
     
     def validation_step(self, batch) -> None:
         data, target = batch
