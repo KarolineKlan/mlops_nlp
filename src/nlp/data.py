@@ -12,6 +12,8 @@ class EmbeddingDataset:
 
     def __init__(self, model_name: str, embedding_save_dir: str = "data/processed", size: int = 3000, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2):
         """Initialize the dataset."""
+        #TODO: Add forced argument for replacing dataset
+        #TODO: Add fail-safe for when train_size > dataset_size
         self.embedding_save_dir = Path(embedding_save_dir)
         self.size = size
         self.seed = seed
