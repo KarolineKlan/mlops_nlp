@@ -6,10 +6,18 @@ from pytorch_lightning import LightningModule
 from model import nlpModel
 from data import EmbeddingDataset
 
-def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> None:
+import hydra
+from omegaconf import DictConfig
+
+@hydra.main(config_path="../../configs", config_name="config")
+def visualize(cfg: DictConfig) -> None:
     """Visualize embeddings using a Lightning model."""
+
     # Load the Lightning model
-    model = nlpModel.load_from_checkpoint(model_checkpoint)
+    model = nlpModel.load_from_checkpoint(
+        cfg["visualize"]["model_checkpoint"], input_dim=cfg["data"]["input_dim"], config=cfg)
+        # Load the Lightning model
+     #skal laves mere dynamisk
 
     # Load test embeddings and labels
     embeddings_path = "data/processed/test/embeddings.pt"
@@ -39,8 +47,8 @@ def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> Non
     plt.ylabel("Dimension 2")
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"reports/figures/{figure_name}")
+    plt.savefig(f"reports/figures/{cfg['visualize']['figure_name']}")
     plt.show()
 
 if __name__ == "__main__":
-    visualize(model_checkpoint="models/epoch=9-step=130.ckpt")
+    visualize()
