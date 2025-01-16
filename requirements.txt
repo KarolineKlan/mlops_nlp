@@ -12,4 +12,5 @@ tqdm==4.67.1
 transformers==4.47.1
 wandb>=0.12.10
 docker==7.1.0
+scikit-learn==1.6.1
 
