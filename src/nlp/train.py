@@ -4,7 +4,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 from pytorch_lightning.loggers import WandbLogger
-from model import nlp_model
+from nlp.model import nlp_model
 from data import EmbeddingDataset
 from loguru import logger
 from torch.utils.data import DataLoader
