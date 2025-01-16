@@ -10,19 +10,28 @@ from tqdm import tqdm
 class EmbeddingDataset:
     """A dataset class that preprocesses and stores embeddings."""
 
-    def __init__(self, model_name: str, embedding_save_dir: str = "data/processed", size: int = 3000, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2):
+    def __init__(self, model_name: str, embedding_save_dir: str = "data/processed", size: int = 3000, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2, force: bool = False):
         """Initialize the dataset."""
-        #TODO: Add forced argument for replacing dataset
-        #TODO: Add fail-safe for when train_size > dataset_size
+
         self.embedding_save_dir = Path(embedding_save_dir)
         self.size = size
         self.seed = seed
         self.test_ratio = test_ratio
         self.val_ratio = val_ratio
+        self.force = force
         
         self.imdb = load_dataset("imdb")
-        self.dataset_split = self.imdb["train"].shuffle(seed=self.seed).select(range(int(self.size))).train_test_split(test_size=self.val_ratio, seed=self.seed)
+        
+        try:
+            self.dataset_split = self.imdb["train"].shuffle(seed=self.seed).select(range(int(self.size))).train_test_split(test_size=self.val_ratio, seed=self.seed)
+        except IndexError:
+            if self.size > len(self.imdb["train"]):
+                logger.warning(f"Warning: dataset size {self.size} is larger than the available dataset {len(self.imdb['train'])}. Using the full dataset instead.")
+                self.dataset_split = self.imdb["train"].shuffle(seed=self.seed).select(range(int(len(self.imdb['train'])))).train_test_split(test_size=self.val_ratio, seed=self.seed)
+            if self.size <= 0:
+                raise IndexError("Dataset size must be greater than 0.")
 
+        
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model = AutoModel.from_pretrained(model_name)
 
@@ -47,7 +56,7 @@ class EmbeddingDataset:
             self.train_embedding_path, self.val_embedding_path, self.test_embedding_path
         ]):
 
-            if save_path.exists():
+            if save_path.exists() and not self.force:
                 logger.info(f"Loading computed {dataset_type} embeddings from {save_path}")
                 embeddings, labels = torch.load(save_path)
             else:
@@ -118,7 +127,7 @@ if __name__ == "__main__":
     
     model_name = "distilbert-base-uncased"
     embedding_save_dir = "data/processed"
-    dataset_size = 500
+    dataset_size = 600
 
     dataset = EmbeddingDataset(
         model_name=model_name,
@@ -126,7 +135,8 @@ if __name__ == "__main__":
         size=dataset_size,
         seed=42,
         test_ratio=0.2,
-        val_ratio=0.2
+        val_ratio=0.2,
+        force=True
     )
 
     train_loader = DataLoader(dataset.train_dataset, batch_size=32, shuffle=True)
