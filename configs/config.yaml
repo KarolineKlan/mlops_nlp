@@ -12,6 +12,7 @@ trainer:
   log_interval: 10
   save_interval: 1
   wandb_project: "dtu_mlops"
+  wandb_team: "spicy-mlops"
   
 data:
   model_name: "distilbert-base-uncased"

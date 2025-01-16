@@ -60,6 +60,7 @@ def train_nlp_model(cfg: DictConfig) -> None:
     logger.info("Training the model...")
     wandb_logger = WandbLogger(
                     project=cfg["trainer"]["wandb_project"],
+                    entity=cfg["trainer"]["wandb_team"],
                     log_model=True)
     
     trainer = Trainer(callbacks=define_callbacks(), 
