@@ -3,9 +3,9 @@ from torch import nn, optim
 import hydra
 from omegaconf import DictConfig
 
-class NlpModel(LightningModule):
+class nlpModel(LightningModule):
     def __init__(self, input_dim, config: DictConfig):
-        super(nlp_model, self).__init__()
+        super(nlpModel, self).__init__()
         self.lr = config["model"]["learning_rate"]
         self.classifier = nn.Sequential(
             nn.Linear(input_dim, 64),
@@ -15,6 +15,8 @@ class NlpModel(LightningModule):
             nn.Softmax()
         )    
         self.criterion = nn.CrossEntropyLoss()
+        self.save_hyperparameters()
+
         
     def forward(self, x):
         return self.classifier(x)

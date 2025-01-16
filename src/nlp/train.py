@@ -4,8 +4,8 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 from pytorch_lightning.loggers import WandbLogger
-from model import nlp_model
-from data import EmbeddingDataset
+from nlp.model import nlpModel
+from nlp.data import EmbeddingDataset
 from loguru import logger
 from torch.utils.data import DataLoader
 from pathlib import Path
@@ -55,12 +55,16 @@ def train_nlp_model(cfg: DictConfig) -> None:
     logger.info("Initializing the model...")
     
     input_dim = len(dataset.train_dataset[0][0]) 
-    model = nlp_model(input_dim=input_dim, config=cfg)
+    model = nlpModel(input_dim=input_dim, config=cfg)
 
     logger.info("Training the model...")
+    wandb_logger = WandbLogger(
+                    project=cfg["trainer"]["wandb_project"],
+                    log_model=True)
+    
     trainer = Trainer(callbacks=define_callbacks(), 
                       max_epochs=cfg["trainer"]["epochs"], 
-                      logger=WandbLogger(project=cfg["trainer"]["wandb_project"]))
+                      logger=wandb_logger)
 
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model, test_loader)
