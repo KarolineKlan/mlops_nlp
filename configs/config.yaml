@@ -26,3 +26,8 @@ data:
   val_ratio: 0.2
   force: False
   
+  input_dim: 768  
+
+visualize:
+  model_checkpoint: "models/SimpleModel.ckpt"
+  figure_name: "embedding_figure.png"

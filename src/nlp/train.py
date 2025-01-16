@@ -11,11 +11,14 @@ from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
-def define_callbacks():
-    checkpoint_callback = ModelCheckpoint(dirpath="./models", monitor="val_loss", mode="min")
-    early_stopping_callback = EarlyStopping(monitor="val_loss", patience=3, verbose=True, mode="min")
-    return [checkpoint_callback, early_stopping_callback]
-
+def define_callbacks(filename):
+        checkpoint_callback = ModelCheckpoint(
+            dirpath="./models", monitor="val_loss", mode="min", filename=filename, auto_insert_metric_name=False
+        )
+        early_stopping_callback = EarlyStopping(
+            monitor="val_loss", patience=3, verbose=True, mode="min"
+        )
+        return [checkpoint_callback, early_stopping_callback]
 
 @hydra.main(config_path="../../configs", config_name="config")
 def train_nlp_model(cfg: DictConfig) -> None:
@@ -63,7 +66,7 @@ def train_nlp_model(cfg: DictConfig) -> None:
         project=cfg["trainer"]["wandb_project"], entity=cfg["trainer"]["wandb_team"], log_model=True
     )
 
-    trainer = Trainer(callbacks=define_callbacks(), max_epochs=cfg["trainer"]["epochs"], logger=wandb_logger)
+    trainer = Trainer(callbacks=define_callbacks(cfg["model"]["name"]), max_epochs=cfg["trainer"]["epochs"], logger=wandb_logger)
 
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model, test_loader)
