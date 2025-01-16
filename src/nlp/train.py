@@ -1,6 +1,6 @@
 import os
 
-from pytorch_lightning import Trainer
+from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 from pytorch_lightning.loggers import WandbLogger
@@ -9,6 +9,8 @@ from data import EmbeddingDataset
 from loguru import logger
 from torch.utils.data import DataLoader
 from pathlib import Path
+import torch
+
 
 import hydra
 from omegaconf import DictConfig
@@ -38,6 +40,7 @@ def train_nlp_model(cfg: DictConfig) -> None:
         None
     """
     logger.info("Initializing the dataset...")
+    seed_everything(cfg["trainer"]["train_seed"])
 
     dataset = EmbeddingDataset(
         model_name=cfg["data"]["model_name"],
@@ -45,10 +48,11 @@ def train_nlp_model(cfg: DictConfig) -> None:
         size=cfg["data"]["train_size"],
         seed=cfg["data"]["data_seed"],
         test_ratio=cfg["data"]["test_ratio"],    
-        val_ratio=cfg["data"]["val_ratio"]     
+        val_ratio=cfg["data"]["val_ratio"],
+        force=cfg["data"]["force"]
     )
 
-    train_loader = DataLoader(dataset.train_dataset, batch_size=cfg["data"]["batch_size"], shuffle=True)
+    train_loader = DataLoader(dataset.train_dataset, batch_size=cfg["data"]["batch_size"], shuffle=True, generator=torch.Generator().manual_seed(cfg["trainer"]["train_seed"]))
     val_loader = DataLoader(dataset.val_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
     test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
 
