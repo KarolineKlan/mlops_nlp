@@ -14,9 +14,9 @@ import hydra
 from omegaconf import DictConfig
 
 
-def define_callbacks():
+def define_callbacks(filename):
         checkpoint_callback = ModelCheckpoint(
-            dirpath="./models", monitor="val_loss", mode="min"
+            dirpath="./models", monitor="val_loss", mode="min", filename=filename, auto_insert_metric_name=False
         )
         early_stopping_callback = EarlyStopping(
             monitor="val_loss", patience=3, verbose=True, mode="min"
@@ -58,7 +58,7 @@ def train_nlp_model(cfg: DictConfig) -> None:
     model = nlpModel(input_dim=input_dim, config=cfg)
 
     logger.info("Training the model...")
-    trainer = Trainer(callbacks=define_callbacks(), 
+    trainer = Trainer(callbacks=define_callbacks(cfg["model"]["name"]), 
                       max_epochs=cfg["trainer"]["epochs"], 
                       logger=WandbLogger(project=cfg["trainer"]["wandb_project"]))
 
