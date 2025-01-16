@@ -5,7 +5,8 @@ hydra:
 model:
   name: "SimpleModel"
   learning_rate: 0.001
-  batch_size: 16
+  dropout: 0.2
+  dropout_active: True
 
 trainer:
   epochs: 10
@@ -18,7 +19,7 @@ data:
   data_path: "data/processed"
   train_size: 3000
   data_seed: 42
-  batch_size: 32
+  batch_size: 8
   test_ratio: 0.2
   val_ratio: 0.2
   
