@@ -25,5 +25,5 @@ data:
   input_dim: 768  
 
 visualize:
-  model_checkpoint: "models/epoch=4-step=125.ckpt"
+  model_checkpoint: "models/SimpleModel.ckpt"
   figure_name: "embedding_figure.png"
