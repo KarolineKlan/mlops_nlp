@@ -13,10 +13,7 @@ import matplotlib.pyplot as plt
 @hydra.main(config_path="../../configs", config_name="config")
 def evaluate(cfg: DictConfig) -> None:
     """Evaluate the trained model."""
-    model_checkpoint= "models/epoch=8-step=450.ckpt"
-    inputdim=768
-    model = nlpModel.load_from_checkpoint(
-        model_checkpoint, input_dim=cfg["data"]["input_dim"], config=cfg)
+    model = nlpModel.load_from_checkpoint("models/"+cfg["model"]["name"]+".ckpt", input_dim=cfg["data"]["input_dim"], config=cfg)
     model.eval()
     
     dataset = EmbeddingDataset(
