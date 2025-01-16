@@ -64,6 +64,9 @@ Note that windows users have to manually run the following commands:
 - pip install -r requirements.txt
 - pip install -e .
 
+### For developers:
+To use pre-commit checks run the following line:
+```pre-commit install```
 
 ## Project structure
 
@@ -116,10 +119,3 @@ The directory structure of the project looks like this:
 Created using [mlops_template](https://github.com/SkafteNicki/mlops_template),
 a [cookiecutter template](https://github.com/cookiecutter/cookiecutter) for getting
 started with Machine Learning Operations (MLOps).
-
-
-## Usage guide
-
-### Developer mode
-To use pre-commit checks:
-```pre-commit install```
