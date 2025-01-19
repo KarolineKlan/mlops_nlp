@@ -34,6 +34,9 @@ def train_nlp_model(cfg: DictConfig) -> None:
     Returns:
         None
     """
+    cfg=cfg.experiment
+    print("Now running experiment",cfg["model"]["name"])
+    print(cfg["data"]["data_path"])
     logger.info("Initializing the dataset...")
     seed_everything(cfg["trainer"]["train_seed"])
 

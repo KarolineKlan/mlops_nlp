@@ -1,0 +1,33 @@
+hydra:
+  run:
+    dir: .
+
+model:
+  name: "SimpleModel"
+  learning_rate: 0.001
+  dropout: 0.2
+  dropout_active: True
+
+trainer:
+  epochs: 10
+  log_interval: 10
+  save_interval: 1
+  wandb_project: "dtu_mlops"
+  train_seed: 42
+  wandb_team: "spicy-mlops"
+  
+data:
+  model_name: "distilbert-base-uncased"
+  data_path: "data/processed"
+  train_size: 500
+  data_seed: 42
+  batch_size: 16
+  test_ratio: 0.2
+  val_ratio: 0.2
+  force: False
+  
+  input_dim: 768  
+
+visualize:
+  model_checkpoint: "models/SimpleModel.ckpt"
+  figure_name: "embedding_figure.png"
