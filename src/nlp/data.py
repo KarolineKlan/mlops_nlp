@@ -10,7 +10,7 @@ from tqdm import tqdm
 class EmbeddingDataset:
     """A dataset class that preprocesses and stores embeddings."""
 
-    def __init__(self, model_name: str, embedding_save_dir: str = "data/processed", size: int = 3000, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2, force: bool = False):
+    def __init__(self, model_name: str = "distilbert-base-uncased", embedding_save_dir: str = "data/processed", size: int = 500, seed: int = 42, test_ratio: float = 0.2, val_ratio: float = 0.2, force: bool = False):
         """Initialize the dataset."""
 
         self.embedding_save_dir = Path(embedding_save_dir)
@@ -58,7 +58,7 @@ class EmbeddingDataset:
 
             if save_path.exists() and not self.force:
                 logger.info(f"Loading computed {dataset_type} embeddings from {save_path}")
-                embeddings, labels = torch.load(save_path)
+                embeddings, labels = torch.load(save_path, weights_only=True)
             else:
                 logger.info(f"Computing {dataset_type} embeddings")
                 embeddings, labels = self._compute_embeddings(dataset_type)

@@ -1,37 +1,39 @@
 from torch.utils.data import Dataset
-from src.nlp.data import EmbeddingDataset
-from pathlib import Path
+from nlp.data import EmbeddingDataset
 
-#import hydra
-#from omegaconf import DictConfig
+import torch
 
-#@hydra.main(config_path="../../configs", config_name="config")
-#TODO: add @pytest.mark.parametrize instead of hardcoding the values
 def test_my_dataset() -> None:
-    """Test the MyDataset class."""
-    model_name = "distilbert-base-uncased"
-    embedding_save_dir = "data/processed"
-    dataset_size = 500
+    """Test the EmbeddingDataset class."""
+
 
     dataset = EmbeddingDataset(
-        model_name=model_name,
-        embedding_save_dir=embedding_save_dir,
-        size=dataset_size,
-        seed=42,
-        test_ratio=0.2,
-        val_ratio=0.2
+        
     )
     
-    for embedding, label in dataset.train_dataset:
-        assert len(embedding)==768
+    train, val, test = dataset.train_dataset, dataset.val_dataset, dataset.test_dataset
+    
+    assert len(train) > 0, f"Expected train dataset to have length > 0, got {len(train)}"
+    assert len(val) > 0, f"Expected val dataset to have length > 0, got {len(val)}"
+    assert len(test) > 0, f"Expected test dataset to have length > 0, got {len(test)}"
         
-    for embedding, label in dataset.val_dataset:
-        assert len(embedding)==768
         
-    for embedding, label in dataset.test_dataset:
-        assert len(embedding)==768
-
-
-
+    for train, val, test in list(zip(dataset.train_dataset, dataset.val_dataset, dataset.test_dataset)):
+        train_embedding, val_embedding, test_embedding = train[0], val[0], test[0]
+        train_label, val_label, test_label = train[1], val[1], test[1]
+        
+        
+        assert train_embedding.shape[0] == val_embedding.shape[0] == test_embedding.shape[0] == 768, f"Expected embedding size to be 768, got {train_embedding.shape[0]}"
+        assert train_label.shape == val_label.shape == test_label.shape == torch.Size([]), f"Expected label size to be 1, got {train_label.numel()}"
+        
+        
+        
+        assert train_label in [0, 1], f"Expected label to be 0 or 1, got {train_label}"
+        assert val_label in [0, 1], f"Expected label to be 0 or 1, got {val_label}"
+        assert test_label in [0, 1], f"Expected label to be 0 or 1, got {test_label}"
+        
+        
+    print("All tests passed!")
+    
 if __name__ == "__main__":
     test_my_dataset()
