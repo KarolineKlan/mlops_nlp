@@ -1,7 +1,16 @@
 invoke==2.2.0
+datasets
 torch>=2.2.2 #changed because of the constraint by mac M1 schip - before constraint was torch==2.5.1
 typer==0.15.1
 wandb==0.19.1
 matplotlib==3.10.0
 hydra-core==1.3.2
-
+invoke==2.2.0
+loguru>=0.7.3
+omegaconf==2.3.0
+pytorch_lightning==2.5.0.post0
+tqdm==4.67.1
+transformers==4.47.1
+wandb>=0.12.10
+docker==7.1.0
+scikit-learn==1.6.1
