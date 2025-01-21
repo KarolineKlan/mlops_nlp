@@ -18,6 +18,7 @@ class nlpModel(LightningModule):
         self.output = nn.Sigmoid()
         self.criterion = nn.BCELoss()
         self.do = self.config["model"]["dropout_active"]
+        self.save_hyperparameters()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.fc1(x)
