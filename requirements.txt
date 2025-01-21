@@ -1,4 +1,5 @@
 invoke==2.2.0
+datasets
 torch>=2.2.2 #changed because of the constraint by mac M1 schip - before constraint was torch==2.5.1
 typer==0.15.1
 wandb==0.19.1

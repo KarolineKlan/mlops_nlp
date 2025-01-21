@@ -31,5 +31,5 @@ line-length = 120
 [tool.coverage.run]
 omit = ["tests/*"]
 
-[project.Scripts]
+[project.scripts]
 train = "nlp.train:main"
