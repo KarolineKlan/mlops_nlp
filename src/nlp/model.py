@@ -30,8 +30,6 @@ class nlpModel(LightningModule):
         return x
 
     def training_step(self, batch, batch_idx):
-
-    def training_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
         loss = self.criterion(preds, target.float())
