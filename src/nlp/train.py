@@ -45,7 +45,6 @@ def train_nlp_model(cfg: DictConfig) -> None:
         size=cfg["data"]["train_size"],
         seed=cfg["data"]["data_seed"],
         test_ratio=cfg["data"]["test_ratio"],
-        test_ratio=cfg["data"]["test_ratio"],
         val_ratio=cfg["data"]["val_ratio"],
         force=cfg["data"]["force"],
     )
