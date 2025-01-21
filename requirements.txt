@@ -9,9 +9,9 @@ invoke==2.2.0
 loguru>=0.7.3
 omegaconf==2.3.0
 pytorch_lightning==2.5.0.post0
-torch==2.5.1
 tqdm==4.67.1
 transformers==4.47.1
 wandb>=0.12.10
 docker==7.1.0
+scikit-learn==1.6.1
 

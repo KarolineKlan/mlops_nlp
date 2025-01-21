@@ -1,11 +1,12 @@
 from pathlib import Path
-from torch.utils.data import Dataset
-from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModel
+
 import torch
-from torch.utils.data import DataLoader
+from datasets import load_dataset
 from loguru import logger
+from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
+from transformers import AutoModel, AutoTokenizer
+
 
 
 class EmbeddingDataset:
@@ -63,6 +64,16 @@ class EmbeddingDataset:
         self.test_embedding_path = self.embedding_save_dir / "test/embeddings.pt"
 
         self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
+        if (
+            (len(self.train_dataset) == (1 - self.val_ratio) * self.size)
+            & (len(self.val_dataset) == self.val_ratio * self.size)
+            & (len(self.test_dataset) == self.test_ratio * self.size)
+        ):
+            logger.info("Dataset splits match parameters.")
+        else:
+            logger.info("Dataset splits don't match parameters. Computing new embeddings.")
+            self.force = True
+            self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
 
     def _load_or_compute_datasets(self):
         """Load precomputed embeddings or compute them."""

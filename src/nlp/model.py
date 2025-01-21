@@ -1,3 +1,4 @@
+from omegaconf import DictConfig
 from pytorch_lightning import LightningModule
 from torch import nn, optim
 import hydra
@@ -29,17 +30,27 @@ class nlpModel(LightningModule):
         return x
 
     def training_step(self, batch, batch_idx):
+
+    def training_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
         loss = self.criterion(preds, target.float())
         acc = (target == preds.round()).float().mean()
         self.log("train_loss", loss)
         self.log("train_acc", acc)
+        self.log("train_loss", loss)
+        self.log("train_acc", acc)
         return loss
+
 
     def test_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
+        loss = self.criterion(preds, target.float())
+        acc = (target == preds.round()).float().mean()
+        self.log("test_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("test_acc", acc, on_epoch=True, prog_bar=True)
+
         loss = self.criterion(preds, target.float())
         acc = (target == preds.round()).float().mean()
         self.log("test_loss", loss, on_epoch=True, prog_bar=True)

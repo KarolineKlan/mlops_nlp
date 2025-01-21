@@ -1,5 +1,11 @@
 docs/site/
 
+wandb/
+
+.hydra/
+
+models/
+
 # test cache
 manual_test/
 
