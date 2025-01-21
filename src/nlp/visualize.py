@@ -1,18 +1,17 @@
+import hydra
 import matplotlib.pyplot as plt
 import torch
+from omegaconf import DictConfig
+from pytorch_lightning import LightningModule
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from pytorch_lightning import LightningModule
-from model import nlpModel
-from data import EmbeddingDataset
 from torch.utils.data import DataLoader
 
-import hydra
-from omegaconf import DictConfig
+from data import EmbeddingDataset
+from nlp.model import nlpModel
+
 
 @hydra.main(config_path="../../configs", config_name="config")
-
-
 def visualize_test(cfg: DictConfig) -> None:
     # Create dataset and dataloaders
     dataset = EmbeddingDataset(
@@ -28,11 +27,12 @@ def visualize_test(cfg: DictConfig) -> None:
     visualize(cfg, test_loader)
 
 
-
 def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
     """Visualize embeddings using a Lightning model."""
     # Load the Lightning model
-    model = nlpModel.load_from_checkpoint(cfg["visualize"]["model_checkpoint"], input_dim=cfg["data"]["input_dim"], config=cfg)
+    model = nlpModel.load_from_checkpoint(
+        cfg["visualize"]["model_checkpoint"], input_dim=cfg["data"]["input_dim"], config=cfg
+    )
     model.eval()
     model.fc2 = torch.nn.Identity()
 
@@ -42,7 +42,7 @@ def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
         for batch in test_loader:
             inputs, targets = batch
             inputs = inputs.to(model.device)
-            outputs = model(inputs).reshape(len(inputs),256)
+            outputs = model(inputs).reshape(len(inputs), 256)
             embeddings.append(outputs)
             labels.append(targets)
 
@@ -66,6 +66,7 @@ def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
     plt.legend()
     plt.grid(True)
     plt.savefig(f"reports/figures/{cfg['visualize']['figure_name']}")
+
 
 if __name__ == "__main__":
     visualize_test()
