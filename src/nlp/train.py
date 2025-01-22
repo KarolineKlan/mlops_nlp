@@ -26,8 +26,12 @@ def define_callbacks(filename):
 
 def train_nlp_model(cfg: DictConfig,sweep_config=None) -> None:
     
-    cfg["data"]["batch_size"] = sweep_config.get("batch_size")
-    cfg["model"]["learning_rate"] = sweep_config.get("learning_rate")
+    if sweep_config:
+         
+        cfg["data"]["batch_size"] = sweep_config.get("parameters", {}).get("batch_size", {}).get("values", [])[0]
+        cfg["model"]["learning_rate"] = sweep_config.get("parameters", {}).get("learning_rate", {}).get("values", [])[0]
+        print(f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}")
+
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
     Arguments:
         embedding_save_path {str} -- Path to the embeddings file
@@ -52,12 +56,6 @@ def train_nlp_model(cfg: DictConfig,sweep_config=None) -> None:
         force=cfg["data"]["force"],
     )
 
-    train_loader = DataLoader(
-        dataset.train_dataset,
-        batch_size=cfg["data"]["batch_size"],
-        shuffle=True,
-        generator=torch.Generator().manual_seed(cfg["trainer"]["train_seed"]),
-    )
     train_loader = DataLoader(
         dataset.train_dataset,
         batch_size=cfg["data"]["batch_size"],
@@ -109,7 +107,7 @@ def train_full_nlp_model(cfg: DictConfig) -> None:
             project=cfg["trainer"]["wandb_project"],
             entity=cfg["trainer"]["wandb_team"],
         )
-        wandb.agent(sweep_id, function=sweep_train(cfg), count=10)
+        wandb.agent(sweep_id, function=sweep_train(cfg), count=5)
     else:
         logger.info("Running standard training...")
         train_nlp_model(cfg)
