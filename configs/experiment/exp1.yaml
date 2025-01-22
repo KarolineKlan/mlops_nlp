@@ -15,6 +15,7 @@ trainer:
   wandb_project: "dtu_mlops"
   train_seed: 42
   wandb_team: "spicy-mlops"
+  sweep: False
   
 data:
   model_name: "distilbert-base-uncased"

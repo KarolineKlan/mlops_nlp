@@ -4,7 +4,7 @@ hydra:
 
 model:
   name: "Experiment2"
-  learning_rate: 0.002
+  learning_rate: 0.001
   dropout: 0.2
   dropout_active: False
 
@@ -15,7 +15,11 @@ trainer:
   wandb_project: "dtu_mlops"
   train_seed: 42
   wandb_team: "spicy-mlops"
-  
+  sweep: True
+  sweep_config: {"method": "bayes", "metric": {"name": "val_loss", "goal": "minimize"},"parameters": 
+{"batch_size": {"values":[16,32]},"learning_rate": {"values":[0.001,0.01]},},
+}
+
 data:
   model_name: "distilbert-base-uncased"
   data_path: "data/processed"

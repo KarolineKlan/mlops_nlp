@@ -9,6 +9,8 @@ from torch.utils.data import DataLoader
 
 from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
+import wandb
+from omegaconf import OmegaConf
 
 
 def define_callbacks(filename):
@@ -21,11 +23,12 @@ def define_callbacks(filename):
         return [checkpoint_callback, early_stopping_callback]
 
 
-@hydra.main(config_path="../../configs", config_name="config")
-def train_nlp_model(cfg: DictConfig) -> None:
+
+def train_nlp_model(cfg: DictConfig,sweep_config=None) -> None:
+    
+    cfg["data"]["batch_size"] = sweep_config.get("batch_size")
+    cfg["model"]["learning_rate"] = sweep_config.get("learning_rate")
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
-
-
     Arguments:
         embedding_save_path {str} -- Path to the embeddings file
         model_name {str} -- Name of the BERT model to use as preprocessing
@@ -36,8 +39,6 @@ def train_nlp_model(cfg: DictConfig) -> None:
     Returns:
         None
     """
-    cfg=cfg.experiment
-    print("Now running",cfg["model"]["name"])
     logger.info("Initializing the dataset...")
     seed_everything(cfg["trainer"]["train_seed"])
 
@@ -65,11 +66,9 @@ def train_nlp_model(cfg: DictConfig) -> None:
     )
     val_loader = DataLoader(dataset.val_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
     test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
-
+    
     logger.info("Initializing the model...")
-
     input_dim = len(dataset.train_dataset[0][0])
-
     input_dim = len(dataset.train_dataset[0][0])
     model = nlpModel(input_dim=input_dim, config=cfg)
 
@@ -87,7 +86,34 @@ def train_nlp_model(cfg: DictConfig) -> None:
 
     return None
 
+def sweep_train(cfg: DictConfig):
+    """Function for WandB sweep agent."""
 
+    def train_with_sweep():
+        wandb.init()
+        sweep_config = cfg["trainer"]["sweep_config"]
+        train_nlp_model(cfg, sweep_config=sweep_config)
+        wandb.finish()
+
+    return train_with_sweep
+
+@hydra.main(config_path="../../configs", config_name="config")
+def train_full_nlp_model(cfg: DictConfig) -> None:
+    """Main entry point."""
+    cfg = cfg.experiment
+
+    if cfg["trainer"]["sweep"]:
+        logger.info("Running WandB Sweep...")
+        sweep_id = wandb.sweep(
+            sweep=OmegaConf.to_container(cfg["trainer"]["sweep_config"], resolve=True),
+            project=cfg["trainer"]["wandb_project"],
+            entity=cfg["trainer"]["wandb_team"],
+        )
+        wandb.agent(sweep_id, function=sweep_train(cfg), count=10)
+    else:
+        logger.info("Running standard training...")
+        train_nlp_model(cfg)
 
 if __name__ == "__main__":
-    train_nlp_model()
+    train_full_nlp_model()
+
