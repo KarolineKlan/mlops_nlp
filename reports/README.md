@@ -294,7 +294,8 @@ We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept 
 >
 > Answer:
 
---- question 12 fill here ---
+We use hydra to parse a config file into a training function. The config files are located in a configs folder and contain an overall config file and several experiment config files. Depending on an experiment argument parsed in the command line the appropriate experiment configurations are loaded. An example usage is:
+```**Write here**```
 
 ### Question 13
 
@@ -309,7 +310,7 @@ We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept 
 >
 > Answer:
 
---- question 13 fill here ---
+The config is always passed to wandb and is saved with each run. So we can always see exaclty which hyperparameters and data configurations produced the experiment results by inspecting the wandb run. To reproduce the experiment one would have to copy the configurations into a config file in the configs/experiment folder and call the experiment when invoking the training.
 
 ### Question 14
 
