@@ -8,7 +8,6 @@ from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 
 
-
 class EmbeddingDataset:
     """A dataset class that preprocesses and stores embeddings."""
 
@@ -86,7 +85,7 @@ class EmbeddingDataset:
         ):
             if save_path.exists() and not self.force:
                 logger.info(f"Loading computed {dataset_type} embeddings from {save_path}")
-                embeddings, labels = torch.load(save_path)
+                embeddings, labels = torch.load(save_path, weights_only=True)
             else:
                 logger.info(f"Computing {dataset_type} embeddings")
                 embeddings, labels = self._compute_embeddings(dataset_type)
