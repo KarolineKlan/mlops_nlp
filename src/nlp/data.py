@@ -1,12 +1,26 @@
 from pathlib import Path
 
 import torch
+import yaml
 from datasets import load_dataset
 from loguru import logger
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 
+
+def save_config(config_path, config_data):
+    """Save configuration data to a YAML file."""
+    with open(config_path, "w") as file:
+        yaml.dump(config_data, file)
+
+
+def load_config(config_path):
+    """Load configuration data from a YAML file."""
+    if config_path.exists():
+        with open(config_path, "r") as file:
+            return yaml.safe_load(file)
+    return None
 
 
 class EmbeddingDataset:
@@ -30,50 +44,52 @@ class EmbeddingDataset:
         self.test_ratio = test_ratio
         self.val_ratio = val_ratio
         self.force = force
-
-        self.imdb = load_dataset("imdb")
-
-        try:
-            self.dataset_split = (
-                self.imdb["train"]
-                .shuffle(seed=self.seed)
-                .select(range(int(self.size)))
-                .train_test_split(test_size=self.val_ratio, seed=self.seed)
-            )
-        except IndexError:
-            if self.size > len(self.imdb["train"]):
-                logger.warning(
-                    f"Warning: dataset size {self.size} is larger than the available dataset {len(self.imdb['train'])}. Using the full dataset instead."
-                )
-                self.dataset_split = (
-                    self.imdb["train"]
-                    .shuffle(seed=self.seed)
-                    .select(range(int(len(self.imdb["train"]))))
-                    .train_test_split(test_size=self.val_ratio, seed=self.seed)
-                )
-            if self.size <= 0:
-                raise IndexError("Dataset size must be greater than 0.")
-
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name)
-
-        self.embedding_save_dir.mkdir(parents=True, exist_ok=True)
-
+        self.available_data = 25000
+        self.config_path = self.embedding_save_dir / "data_config.yaml"
         self.train_embedding_path = self.embedding_save_dir / "train/embeddings.pt"
         self.val_embedding_path = self.embedding_save_dir / "val/embeddings.pt"
         self.test_embedding_path = self.embedding_save_dir / "test/embeddings.pt"
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.model = AutoModel.from_pretrained(model_name)
+
+        # Load existing configuration or set defaults
+        self.embedding_save_dir.mkdir(parents=True, exist_ok=True)
+        config = load_config(self.config_path) or {}
+
+        if self.size > self.available_data:
+            self.size = self.available_data
+            logger.warning(
+                f"Warning: dataset size {self.size} is larger than the available dataset {self.available_data}. Using the full dataset instead."
+            )
+        elif self.size <= 0:
+            raise IndexError("Dataset size must be greater than 0.")
+
+        if config.get("size") != self.size or config.get("seed") != self.seed or not self._check_embedding_files():
+            logger.info("Configuration mismatch or embeddings missing. Recomputing embeddings.")
+            self.force = True
+
+        if self.force:
+            self.imdb = load_dataset("imdb")
+            self.dataset_split = (
+                self.imdb["train"]
+                .shuffle(seed=self.seed)
+                .select(range(self.size))
+                .train_test_split(test_size=self.val_ratio, seed=self.seed)
+            )
 
         self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
-        if (
-            (len(self.train_dataset) == (1 - self.val_ratio) * self.size)
-            & (len(self.val_dataset) == self.val_ratio * self.size)
-            & (len(self.test_dataset) == self.test_ratio * self.size)
-        ):
-            logger.info("Dataset splits match parameters.")
-        else:
-            logger.info("Dataset splits don't match parameters. Computing new embeddings.")
-            self.force = True
-            self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
+
+        # Save configuration
+        config_data = {"size": self.size, "seed": self.seed}
+        save_config(self.config_path, config_data)
+
+    def _check_embedding_files(self):
+        """Check if all embedding files exist."""
+        return (
+            self.train_embedding_path.exists()
+            and self.val_embedding_path.exists()
+            and self.test_embedding_path.exists()
+        )
 
     def _load_or_compute_datasets(self):
         """Load precomputed embeddings or compute them."""
@@ -148,7 +164,7 @@ if __name__ == "__main__":
 
     model_name = "distilbert-base-uncased"
     embedding_save_dir = "data/processed"
-    dataset_size = 600
+    dataset_size = 20
 
     dataset = EmbeddingDataset(
         model_name=model_name,

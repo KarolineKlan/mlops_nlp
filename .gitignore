@@ -185,3 +185,4 @@ cython_debug/
 .hydra/
 wandb/
 models/
+data/
