@@ -17,7 +17,7 @@ trainer:
   wandb_team: "spicy-mlops"
   sweep: True
   sweep_config: {"method": "bayes", "metric": {"name": "val_loss", "goal": "minimize"},"parameters": 
-{"batch_size": {"values":[16,32]},"learning_rate": {"values":[0.001,0.01]},},
+{"batch_size": {"values":[16,32]},"learning_rate": {"min":0.001,"max":0.01},},
 }
 
 data:

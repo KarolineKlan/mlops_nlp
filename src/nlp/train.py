@@ -23,14 +23,14 @@ def define_callbacks(filename):
         return [checkpoint_callback, early_stopping_callback]
 
 
-
-def train_nlp_model(cfg: DictConfig,sweep_config=None) -> None:
+def train_nlp_model(cfg: DictConfig,sweep_config: None) -> None:
     
-    if sweep_config:
-         
-        cfg["data"]["batch_size"] = sweep_config.get("parameters", {}).get("batch_size", {}).get("values", [])[0]
-        cfg["model"]["learning_rate"] = sweep_config.get("parameters", {}).get("learning_rate", {}).get("values", [])[0]
-        print(f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}")
+    if cfg["trainer"]["sweep"]:
+        with wandb.init(config=cfg):
+            config=wandb.config
+            cfg["data"]["batch_size"] = sweep_config.batch_size
+            cfg["model"]["learning_rate"] = sweep_config.learning_rate
+            print(f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}")
 
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
     Arguments:
@@ -86,11 +86,9 @@ def train_nlp_model(cfg: DictConfig,sweep_config=None) -> None:
 
 def sweep_train(cfg: DictConfig):
     """Function for WandB sweep agent."""
-
     def train_with_sweep():
         wandb.init()
-        sweep_config = cfg["trainer"]["sweep_config"]
-        train_nlp_model(cfg, sweep_config=sweep_config)
+        train_nlp_model(cfg, sweep_config=wandb.config)
         wandb.finish()
 
     return train_with_sweep
@@ -99,7 +97,6 @@ def sweep_train(cfg: DictConfig):
 def train_full_nlp_model(cfg: DictConfig) -> None:
     """Main entry point."""
     cfg = cfg.experiment
-
     if cfg["trainer"]["sweep"]:
         logger.info("Running WandB Sweep...")
         sweep_id = wandb.sweep(
@@ -107,7 +104,7 @@ def train_full_nlp_model(cfg: DictConfig) -> None:
             project=cfg["trainer"]["wandb_project"],
             entity=cfg["trainer"]["wandb_team"],
         )
-        wandb.agent(sweep_id, function=sweep_train(cfg), count=5)
+        wandb.agent(sweep_id, function=sweep_train(cfg), count=10)
     else:
         logger.info("Running standard training...")
         train_nlp_model(cfg)
