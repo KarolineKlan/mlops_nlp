@@ -28,7 +28,7 @@ class EmbeddingDataset:
 
     def __init__(
         self,
-        model_name: str,
+        model_name: str = "distilbert-base-uncased",
         embedding_save_dir: str = "data/processed",
         size: int = 3000,
         seed: int = 42,
