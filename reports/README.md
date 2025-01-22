@@ -56,28 +56,28 @@ will check the repositories and the code to verify your answers.
 * [x] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
 * [x] Remember to fill out the `requirements.txt` and `requirements_dev.txt` file with whatever dependencies that you
     are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [ ] Setup version control for your data or part of your data (M8)
-* [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
-* [ ] Write one or multiple configurations files for your experiments (M11)
+* [X] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [X] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [X] Setup version control for your data or part of your data (M8)
+* [X] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [X] Construct one or multiple docker files for your code (M10)
+* [X] Build the docker files locally and make sure they work as intended (M10)
+* [X] Write one or multiple configurations files for your experiments (M11)
 * [x] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
 * [x] Use logging to log important events in your code (M14)
 * [x] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
-* [ ] Consider running a hyperparameter optimization sweep (M14)
+* [X] Consider running a hyperparameter optimization sweep (M14)
 * [x] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
+* [X] Write unit tests related to the data part of your code (M16)
+* [X] Write unit tests related to model construction and or model training (M16)
 * [ ] Calculate the code coverage (M16)
 * [ ] Get some continuous integration running on the GitHub repository (M17)
-* [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
+* [X] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
+* [X] Add a linting step to your continuous integration (M17)
 * [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
@@ -143,7 +143,7 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
---- question 3 fill here ---
+We used the transformers package from hugging face to do preprocessing on our data. More specifically we used the "distilbert-base-uncased" model including the appropriate tokenizer to create embeddings of the text data. These embeddings were then saved in the "data/processed" directory.
 
 ## Coding environment
 
@@ -163,7 +163,7 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
---- question 4 fill here ---
+We use requirements files to manage packages for running the training code and to develop on the project. A developer would need to pip install both the "requirements.txt" and "requirements_dev.txt". In the readme, there is a step-by-step instruction for running the code, consisting of installing invoke and invoking a "Create environment"-task and "Install requirements"-task. This installs both requirements files. Hereafter one needs to run "pre-commit install" to activate pre-commits. Furthermore, we have also created docker images with docker files that are deployed in the cloud.
 
 ### Question 5
 
@@ -179,7 +179,7 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
---- question 5 fill here ---
+We used most of the cookiecutter template. The only folder we have removed is the notebooks folder. We have extended the config implementation to have several config files for different experiments. Furthermore, as data version control we save a data_config file with our preprocessed data to always be sure what data we are using for specific experiments.
 
 ### Question 6
 
@@ -243,7 +243,7 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
---- question 9 fill here ---
+We used branches and pull requests extensively. Since we worked concurrently on the project we created separate branches for coding different sections of the project. When a branch for development was done and tested, we merged it into main. This made it possible for us to always have working code even when fixing multiple issues at the same time. Furthermore, if issues arose we could go back to a previous version where the code was running seamlessly.
 
 ### Question 10
 
@@ -258,7 +258,7 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
---- question 10 fill here ---
+We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable.
 
 ### Question 11
 
