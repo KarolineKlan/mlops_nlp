@@ -8,6 +8,7 @@ from tqdm import tqdm
 from transformers import AutoModel, AutoTokenizer
 
 
+
 class EmbeddingDataset:
     """A dataset class that preprocesses and stores embeddings."""
 

@@ -1,10 +1,13 @@
 from omegaconf import DictConfig
 from pytorch_lightning import LightningModule
 from torch import nn, optim
+import hydra
+import torch
+from omegaconf import DictConfig
 
 
 class nlpModel(LightningModule):
-    def __init__(self, input_dim, config: DictConfig):
+    def __init__(self, input_dim: int, config: DictConfig):
         super(nlpModel, self).__init__()
         self.config = config
         self.lr = self.config["model"]["learning_rate"]
@@ -15,8 +18,9 @@ class nlpModel(LightningModule):
         self.output = nn.Sigmoid()
         self.criterion = nn.BCELoss()
         self.do = self.config["model"]["dropout_active"]
+        self.save_hyperparameters()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.fc1(x)
         x = self.active(x)
         x = self.fc2(x)
@@ -33,11 +37,19 @@ class nlpModel(LightningModule):
         acc = (target == preds.round()).float().mean()
         self.log("train_loss", loss)
         self.log("train_acc", acc)
+        self.log("train_loss", loss)
+        self.log("train_acc", acc)
         return loss
+
 
     def test_step(self, batch, batch_idx):
         data, target = batch
         preds = self(data)
+        loss = self.criterion(preds, target.float())
+        acc = (target == preds.round()).float().mean()
+        self.log("test_loss", loss, on_epoch=True, prog_bar=True)
+        self.log("test_acc", acc, on_epoch=True, prog_bar=True)
+
         loss = self.criterion(preds, target.float())
         acc = (target == preds.round()).float().mean()
         self.log("test_loss", loss, on_epoch=True, prog_bar=True)

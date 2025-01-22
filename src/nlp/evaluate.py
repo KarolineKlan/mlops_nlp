@@ -1,6 +1,6 @@
 
 import torch
-from model import nlpModel
+from nlp.model import nlpModel
 from torch.utils.data import DataLoader
 from data import EmbeddingDataset
 import hydra

@@ -20,9 +20,11 @@ def define_callbacks(filename):
         )
         return [checkpoint_callback, early_stopping_callback]
 
+
 @hydra.main(config_path="../../configs", config_name="config")
 def train_nlp_model(cfg: DictConfig) -> None:
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
+
 
     Arguments:
         embedding_save_path {str} -- Path to the embeddings file
@@ -55,10 +57,18 @@ def train_nlp_model(cfg: DictConfig) -> None:
         shuffle=True,
         generator=torch.Generator().manual_seed(cfg["trainer"]["train_seed"]),
     )
+    train_loader = DataLoader(
+        dataset.train_dataset,
+        batch_size=cfg["data"]["batch_size"],
+        shuffle=True,
+        generator=torch.Generator().manual_seed(cfg["trainer"]["train_seed"]),
+    )
     val_loader = DataLoader(dataset.val_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
     test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
 
     logger.info("Initializing the model...")
+
+    input_dim = len(dataset.train_dataset[0][0])
 
     input_dim = len(dataset.train_dataset[0][0])
     model = nlpModel(input_dim=input_dim, config=cfg)
@@ -76,6 +86,7 @@ def train_nlp_model(cfg: DictConfig) -> None:
     # visualize something
 
     return None
+
 
 
 if __name__ == "__main__":

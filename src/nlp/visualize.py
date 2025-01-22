@@ -3,7 +3,7 @@ import torch
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from pytorch_lightning import LightningModule
-from model import nlpModel
+from nlp.model import nlpModel
 from data import EmbeddingDataset
 from torch.utils.data import DataLoader
 
