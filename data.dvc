@@ -1,6 +1,39 @@
 outs:
-- md5: 39e89ab9b3ed5046cb9a5342dccca77a.dir
-  size: 1852286
-  nfiles: 4
-  hash: md5
+- hash: md5
   path: data
+  files:
+  - relpath: processed/.gitkeep
+    md5: d41d8cd98f00b204e9800998ecf8427e
+    size: 0
+    cloud:
+      remote_storage:
+        etag: 08b7f9a6c6c78b8b031001
+        version_id: '1737625535364279'
+  - relpath: processed/data_config.yaml
+    md5: 3db2daee880dbe8cb1a3c7c19e8cab81
+    size: 16
+    cloud:
+      remote_storage:
+        etag: 08a2b38a88cd8b8b031001
+        version_id: '1737627015485858'
+  - relpath: processed/test/embeddings.pt
+    md5: f65d8144e0d3ce066053d376b3f04ffa
+    size: 309418
+    cloud:
+      remote_storage:
+        etag: 08e19fb9c6c78b8b031001
+        version_id: '1737625535664097'
+  - relpath: processed/train/embeddings.pt
+    md5: bec943dd90e0e4ba79f2c65561d19fb3
+    size: 1233450
+    cloud:
+      remote_storage:
+        etag: 08d68cbcc6c78b8b031001
+        version_id: '1737625535710806'
+  - relpath: processed/val/embeddings.pt
+    md5: c75f71bc1c409cabe6c7115b026daf00
+    size: 309418
+    cloud:
+      remote_storage:
+        etag: 089becc0c6c78b8b031001
+        version_id: '1737625535788571'
