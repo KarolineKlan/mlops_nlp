@@ -1,36 +1,34 @@
 import hydra
 import torch
 from loguru import logger
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Trainer, seed_everything
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader
 
+import wandb
 from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
-import wandb
-from omegaconf import OmegaConf
 
 
 def define_callbacks(filename):
-        checkpoint_callback = ModelCheckpoint(
-            dirpath="./models", monitor="val_loss", mode="min", filename=filename, auto_insert_metric_name=False
-        )
-        early_stopping_callback = EarlyStopping(
-            monitor="val_loss", patience=3, verbose=True, mode="min"
-        )
-        return [checkpoint_callback, early_stopping_callback]
+    checkpoint_callback = ModelCheckpoint(
+        dirpath="./models", monitor="val_loss", mode="min", filename=filename, auto_insert_metric_name=False
+    )
+    early_stopping_callback = EarlyStopping(monitor="val_loss", patience=3, verbose=True, mode="min")
+    return [checkpoint_callback, early_stopping_callback]
 
 
-def train_nlp_model(cfg: DictConfig,sweep_config: None) -> None:
-    
+def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
     if cfg["trainer"]["sweep"]:
         with wandb.init(config=cfg):
-            config=wandb.config
+            config = wandb.config
             cfg["data"]["batch_size"] = sweep_config.batch_size
             cfg["model"]["learning_rate"] = sweep_config.learning_rate
-            print(f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}")
+            print(
+                f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}"
+            )
 
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
     Arguments:
@@ -64,7 +62,7 @@ def train_nlp_model(cfg: DictConfig,sweep_config: None) -> None:
     )
     val_loader = DataLoader(dataset.val_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
     test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
-    
+
     logger.info("Initializing the model...")
     input_dim = len(dataset.train_dataset[0][0])
     input_dim = len(dataset.train_dataset[0][0])
@@ -75,7 +73,9 @@ def train_nlp_model(cfg: DictConfig,sweep_config: None) -> None:
         project=cfg["trainer"]["wandb_project"], entity=cfg["trainer"]["wandb_team"], log_model=True
     )
 
-    trainer = Trainer(callbacks=define_callbacks(cfg["model"]["name"]), max_epochs=cfg["trainer"]["epochs"], logger=wandb_logger)
+    trainer = Trainer(
+        callbacks=define_callbacks(cfg["model"]["name"]), max_epochs=cfg["trainer"]["epochs"], logger=wandb_logger
+    )
 
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model, test_loader)
@@ -84,14 +84,17 @@ def train_nlp_model(cfg: DictConfig,sweep_config: None) -> None:
 
     return None
 
+
 def sweep_train(cfg: DictConfig):
     """Function for WandB sweep agent."""
+
     def train_with_sweep():
         wandb.init()
         train_nlp_model(cfg, sweep_config=wandb.config)
         wandb.finish()
 
     return train_with_sweep
+
 
 @hydra.main(config_path="../../configs", config_name="config")
 def train_full_nlp_model(cfg: DictConfig) -> None:
@@ -109,6 +112,6 @@ def train_full_nlp_model(cfg: DictConfig) -> None:
         logger.info("Running standard training...")
         train_nlp_model(cfg)
 
+
 if __name__ == "__main__":
     train_full_nlp_model()
-
