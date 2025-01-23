@@ -6,7 +6,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from torch.utils.data import DataLoader
 
-from data import EmbeddingDataset
+from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
