@@ -23,6 +23,7 @@ def define_callbacks(filename):
 
 
 def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
+    wandb.login(YOUR_API_KEY)
     if cfg["trainer"]["sweep"]:
         with wandb.init(config=cfg):
             config = wandb.config
