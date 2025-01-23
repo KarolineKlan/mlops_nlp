@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 
-from data import EmbeddingDataset
+from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
@@ -53,4 +53,4 @@ def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
 
 
 if __name__ == "__main__":
-    visualize_test()
+    visualize()
