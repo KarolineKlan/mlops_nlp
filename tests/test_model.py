@@ -12,6 +12,7 @@ def test_model(input_dim: int) -> None:
 
     with initialize(config_path="../configs", version_base=None):
         cfg = compose(config_name="config")
+        cfg = cfg.experiment
 
     model = nlpModel(input_dim=input_dim, config=cfg)
     x = torch.randn(input_dim)

@@ -11,22 +11,6 @@ from data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
-@hydra.main(config_path="../../configs", config_name="config")
-def visualize_test(cfg: DictConfig) -> None:
-    # Create dataset and dataloaders
-    dataset = EmbeddingDataset(
-        model_name=cfg["data"]["model_name"],
-        embedding_save_dir=cfg["data"]["data_path"],
-        size=cfg["data"]["train_size"],
-        seed=cfg["data"]["data_seed"],
-        test_ratio=cfg["data"]["test_ratio"],
-        val_ratio=cfg["data"]["val_ratio"],
-    )
-    test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
-
-    visualize(cfg, test_loader)
-
-
 def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
     """Visualize embeddings using a Lightning model."""
     # Load the Lightning model
@@ -65,7 +49,7 @@ def visualize(cfg: DictConfig, test_loader: DataLoader) -> None:
     plt.ylabel("t-SNE Dimension 2")
     plt.legend()
     plt.grid(True)
-    plt.savefig(f"reports/figures/{cfg['visualize']['figure_name']}")
+    return plt
 
 
 if __name__ == "__main__":

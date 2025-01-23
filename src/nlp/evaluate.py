@@ -10,8 +10,7 @@ from data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
-@hydra.main(config_path="../../configs", config_name="config")
-def evaluate(cfg: DictConfig) -> None:
+def evaluate(cfg: DictConfig, test_loader: DataLoader) -> None:
     """Evaluate the trained model."""
     model = nlpModel.load_from_checkpoint(
         "models/" + cfg["model"]["name"] + ".ckpt", input_dim=cfg["data"]["input_dim"], config=cfg
@@ -26,7 +25,6 @@ def evaluate(cfg: DictConfig) -> None:
         test_ratio=cfg["data"]["test_ratio"],
         val_ratio=cfg["data"]["val_ratio"],
     )
-    test_loader = DataLoader(dataset.test_dataset, batch_size=cfg["data"]["batch_size"], shuffle=False)
     true_labels = []
     predictions = []
 
@@ -41,7 +39,7 @@ def evaluate(cfg: DictConfig) -> None:
     disp = ConfusionMatrixDisplay(confusion_matrix=cm)
     disp.plot(cmap=plt.cm.Blues)
     plt.title("Confusion Matrix")
-    plt.savefig("reports/figures/ConfusionMatrix.png")
+    return plt
 
 
 if __name__ == "__main__":
