@@ -5,7 +5,7 @@ steps:
     'build',
     '.',
     '-t',
-    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/<registry-name>/<image-name>',
+    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/training-repo/train',
     '-f',
     '<path-to-dockerfile>'
   ]
@@ -13,7 +13,7 @@ steps:
   id: 'Push container image'
   args: [
     'push',
-    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/<registry-name>/<image-name>'
+    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/training-repo/train'
   ]
 options:
   logging: CLOUD_LOGGING_ONLY

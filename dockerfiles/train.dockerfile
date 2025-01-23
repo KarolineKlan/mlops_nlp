@@ -11,7 +11,7 @@ COPY requirements.txt requirements.txt
 COPY requirements_dev.txt requirements_dev.txt
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
-COPY data/ data/
+#COPY data/ data/
 COPY models/ models/
 COPY reports/figures/ reports/figures
 
