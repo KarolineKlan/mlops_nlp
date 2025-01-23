@@ -106,6 +106,13 @@ class EmbeddingDataset:
         elif self.size <= 0:
             raise IndexError("Dataset size must be greater than 0.")
 
+        logger.info(
+            f"Requested dataset size: {self.size}, config dataset size: {config.get('size')}, equal? {config.get('size') == self.size}"
+        )
+        logger.info(
+            f"Requested seed: {self.seed}, config seed: {config.get('seed')}, equal? {config.get('seed') == self.seed}"
+        )
+        logger.info(f"Embedding files?: {self._check_embedding_files()}")
         if (
             config.get("size") != config.get("size")
             or config.get("seed") != self.seed
@@ -125,9 +132,10 @@ class EmbeddingDataset:
 
         self.train_dataset, self.val_dataset, self.test_dataset = self._load_or_compute_datasets()
 
-        # Save configuration
-        config_data = {"size": self.size, "seed": self.seed}
-        save_config_to_gcs(GCS_bucket, self.config_blob, config_data)
+        # Save configuration if new embeddings have been computed
+        if self.force == True:
+            config_data = {"size": self.size, "seed": self.seed}
+            save_config_to_gcs(GCS_bucket, self.config_blob, config_data)
 
     def _check_embedding_files(self):
         """Check if all embedding files exist in the GCS bucket."""
