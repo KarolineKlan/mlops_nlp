@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader
 
 import wandb
 from nlp.data import EmbeddingDataset
+from nlp.evaluate import evaluate
 from nlp.model import nlpModel
+from nlp.visualize import visualize
 
 
 def define_callbacks(filename):
@@ -77,8 +79,14 @@ def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model, test_loader)
 
-    # visualize something
+    """Visualize"""
+    cm = evaluate(cfg, test_loader)
+    wandb.log({"Confusion_marix": wandb.Image(cm)})
+    cm.close()
 
+    embed = visualize(cfg, test_loader)
+    wandb.log({"Embeddings": wandb.Image(embed)})
+    embed.close()
     return None
 
 
