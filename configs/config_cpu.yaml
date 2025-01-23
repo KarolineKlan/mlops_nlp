@@ -1,0 +1,8 @@
+# config_cpu.yaml
+workerPoolSpecs:
+    machineSpec:
+        machineType: n1-highmem-2
+    replicaCount: 1
+    containerSpec:
+
+        imageUri: europe-west1-docker.pkg.dev/mlops-nlp-cloud/training-repo/train:latest
