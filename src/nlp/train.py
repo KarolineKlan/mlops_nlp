@@ -26,9 +26,6 @@ def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
             config = wandb.config
             cfg["data"]["batch_size"] = sweep_config.batch_size
             cfg["model"]["learning_rate"] = sweep_config.learning_rate
-            print(
-                f"Using Sweep Parameters: Batch Size: {cfg['data']['batch_size']}, Learning Rate: {cfg['model']['learning_rate']}"
-            )
 
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
     Arguments:
@@ -86,7 +83,7 @@ def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
 
 
 def sweep_train(cfg: DictConfig):
-    """Function for WandB sweep agent."""
+    """Function for wandb sweep agent."""
 
     def train_with_sweep():
         wandb.init()
@@ -98,7 +95,6 @@ def sweep_train(cfg: DictConfig):
 
 @hydra.main(config_path="../../configs", config_name="config")
 def train_full_nlp_model(cfg: DictConfig) -> None:
-    """Main entry point."""
     cfg = cfg.experiment
     if cfg["trainer"]["sweep"]:
         logger.info("Running WandB Sweep...")
@@ -107,7 +103,7 @@ def train_full_nlp_model(cfg: DictConfig) -> None:
             project=cfg["trainer"]["wandb_project"],
             entity=cfg["trainer"]["wandb_team"],
         )
-        wandb.agent(sweep_id, function=sweep_train(cfg), count=10)
+        wandb.agent(sweep_id, function=sweep_train(cfg), count=cfg["trainer"]["count"])
     else:
         logger.info("Running standard training...")
         train_nlp_model(cfg)

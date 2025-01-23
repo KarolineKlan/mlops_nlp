@@ -16,7 +16,7 @@ trainer:
   train_seed: 42
   wandb_team: "spicy-mlops"
   sweep: False
-  
+
 data:
   model_name: "distilbert-base-uncased"
   data_path: "data/processed"
@@ -26,8 +26,7 @@ data:
   test_ratio: 0.2
   val_ratio: 0.2
   force: False
-  
-  input_dim: 768  
+  input_dim: 768
 
 visualize:
   model_checkpoint: "models/SimpleModel.ckpt"
