@@ -498,7 +498,10 @@ The API is designed using the lifespan handler such that it loads the used model
 >
 > Answer:
 
---- question 25 fill here ---
+No we did not perform unit testing or load testing on the API due to time constraints. 
+If we were to do so we would implement the unit testing via pytest. These could ensure that the input to the API is correct by checking that the type is “string” or that the model is correctly loaded from from the GCP bucket. 
+For load testing we would use the locust framework to simulate a number of users, and check how the API reponds to this demand, what the average response time is and how many requests per second the API can handle. 
+
 
 ### Question 26
 
@@ -567,6 +570,8 @@ No - we looked into trying to make a front-end but did not manage witin the time
 >
 > Answer:
 
+![MLOps_pipeline](figures/MLOps_Pipeline.png)
+
 The local setup (squared box):
 The initial repo was setup using the cookie cutter template. TThe source code is organized within the src/ folder and includes key functionalities like data preprocessing using HuggingFace Transformers’ DistilBERT model. This model generates embeddings from the IMDB dataset, which is loaded via the PyTorch torchvision.datasets module.
 The local development environment integrates several tools:
@@ -580,7 +585,7 @@ Once code changes are committed and pushed to GitHub, GitHub Actions is triggere
 - Unit tests with Pytest.
 - Dependabot to check and bump package versions for consistent dependency management.
 
-The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines.
+The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines. Fast API enables to access the models in the bucket serves as the interface for running inference on the trained classifier.
 
 
 ### Question 30
