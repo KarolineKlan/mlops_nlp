@@ -12,7 +12,8 @@ COPY README.md README.md
 COPY pyproject.toml pyproject.toml
 
 RUN pip install -r requirements.txt --no-cache-dir --verbose
+#RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt
 RUN pip install . --no-deps --no-cache-dir --verbose
 
 EXPOSE $PORT
-ENTRYPOINT ["uvicorn", "src.nlp.api:app", "--host", "0.0.0.0", "--port", $PORT]
+CMD exec uvicorn api:app --port 8080 --workers 1 src.nlp.api:app
