@@ -52,14 +52,14 @@ def upload_to_gcs(bucket_name, data, destination_blob):
     logger.info(f"Uploaded data to gs://{bucket_name}/{destination_blob}")
 
 
-def download_from_gcs(bucket_name, source_blob):
+def download_from_gcs(bucket_name, source_blob, weights_only=True):
     """Download data from a GCS bucket."""
     client = storage.Client.create_anonymous_client()
     bucket = client.bucket(bucket_name)
     blob = bucket.blob(str(source_blob))
     content = blob.download_as_bytes()
     with io.BytesIO(content) as data_stream:
-        data = torch.load(data_stream, weights_only=True)
+        data = torch.load(data_stream, weights_only=weights_only)
     return data
 
 

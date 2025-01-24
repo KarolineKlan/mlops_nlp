@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
 
 import torch
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI
 from loguru import logger
 from transformers import AutoModel, AutoTokenizer
 
+from nlp.data import download_from_gcs
 from nlp.model import nlpModel
 
 
@@ -15,7 +16,10 @@ async def lifespan(app: FastAPI):
     print("Loading model")
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
     embedding = AutoModel.from_pretrained("distilbert-base-uncased")
-    classifier = nlpModel.load_from_checkpoint("models/SimpleModel.ckpt")
+    checkpoint = download_from_gcs("mlops_nlp_cloud_models", "SimpleModel.ckpt", weights_only=False)
+    classifier = nlpModel(checkpoint["hyper_parameters"]["input_dim"], checkpoint["hyper_parameters"]["config"])
+    classifier.load_state_dict(checkpoint["state_dict"])
+
     device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
     embedding.to(device)
     classifier.to(device)
@@ -37,7 +41,6 @@ def read_root():
 
 @app.post("/review/")
 async def inference(input_string: str = "it was a bad movie"):
-    """Infer semantics given a IMDB review."""
     """Infer semantics given an IMDB review."""
     inputs = tokenizer(input_string, return_tensors="pt", padding=True, truncation=True)
     inputs.to(device)
