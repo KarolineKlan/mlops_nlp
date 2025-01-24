@@ -16,4 +16,4 @@ RUN pip install -r requirements.txt --no-cache-dir --verbose
 RUN pip install . --no-deps --no-cache-dir --verbose
 
 EXPOSE $PORT
-CMD exec uvicorn api:app --port 8080 --workers 1 src.nlp.api:app
+CMD exec uvicorn src.nlp.api:app --port $PORT --host 0.0.0.0 --workers 1

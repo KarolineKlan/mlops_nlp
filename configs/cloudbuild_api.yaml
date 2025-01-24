@@ -5,7 +5,7 @@ steps:
     'build',
     '.',
     '-t',
-    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/inference-repo/api_inf:latest',
+    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/inference-repo/api_inf_get:latest',
     '-f',
     'dockerfiles/api.dockerfile'
   ]
@@ -13,7 +13,7 @@ steps:
   id: 'Push container image'
   args: [
     'push',
-    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/inference-repo/api_inf:latest'
+    'europe-west1-docker.pkg.dev/mlops-nlp-cloud/inference-repo/api_inf_get:latest'
   ]
 options:
   logging: CLOUD_LOGGING_ONLY

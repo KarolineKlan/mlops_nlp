@@ -39,7 +39,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.post("/review/")
+@app.get("/review/")
 async def inference(input_string: str = "it was a bad movie"):
     """Infer semantics given an IMDB review."""
     inputs = tokenizer(input_string, return_tensors="pt", padding=True, truncation=True)
