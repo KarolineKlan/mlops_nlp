@@ -334,7 +334,8 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 14 fill here ---
+
+![Experiment 2 - hyperparameter sweep](figures/WandB_Sweep_Exp2.png)
 
 ### Question 15
 
