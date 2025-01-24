@@ -1,5 +1,8 @@
+import os
+
 import hydra
 import torch
+from google.cloud import storage
 from loguru import logger
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning import Trainer, seed_everything
@@ -14,12 +17,41 @@ from nlp.model import nlpModel
 from nlp.visualize import visualize
 
 
+class GCSModelCheckpoint(ModelCheckpoint):
+    """
+    Custom ModelCheckpoint callback to save the best model to a Google Cloud Storage bucket.
+
+    Arguments:
+        bucket_name (str): The name of the GCS bucket to save the model to.
+    """
+
+    def __init__(self, bucket_name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.bucket_name = bucket_name
+        self.client = storage.Client.create_anonymous_client()
+        self.bucket = self.client.bucket(bucket_name)
+
+    def on_train_end(self, trainer, pl_module):
+        super().on_train_end(trainer, pl_module)
+        # Upload the best checkpoint to GCS after training ends
+        if self.best_model_path:
+            logger.info(f"Uploading to bucket")
+            logger.info(f"Best model path: {self.best_model_path}")
+            checkpoint_path = os.path.basename(self.best_model_path)
+            logger.info(f"Checkpoint path: {checkpoint_path}")
+            local_path = self.best_model_path
+            logger.info(f"Local path: {local_path}")
+            blob = self.bucket.blob(checkpoint_path)
+            blob.upload_from_filename(local_path)
+            logger.info(f"Uploaded best checkpoint to gs://{self.bucket_name}/{checkpoint_path}")
+
+
 def define_callbacks(filename):
     """
     Define and return a list of callbacks for model training.
 
     This function creates two callbacks:
-    1. ModelCheckpoint: Saves the model checkpoints to the specified directory when the monitored metric improves.
+    1. GCSModelCheckpoint: Saves the model checkpoints to the specified directory locally when the monitored metric improves. In end of training the best model is pushed to a cloud bucket.
     2. EarlyStopping: Stops training early if the monitored metric does not improve for a specified number of epochs.
 
     Args:
@@ -28,8 +60,20 @@ def define_callbacks(filename):
     Returns:
         list: A list containing the ModelCheckpoint and EarlyStopping callbacks.
     """
-    checkpoint_callback = ModelCheckpoint(
-        dirpath="./models", monitor="val_loss", mode="min", filename=filename, auto_insert_metric_name=False
+    """local_checkpoint_callback = ModelCheckpoint(
+        dirpath="./models",
+        monitor="val_loss",
+        mode="min",
+        filename="SimpleModel-{epoch:02d}-{val_loss:.2f}"
+    )"""
+    checkpoint_callback = GCSModelCheckpoint(
+        bucket_name="mlops_nlp_cloud_models",
+        dirpath="./models",
+        monitor="val_loss",
+        mode="min",
+        filename="SimpleModel",
+        save_top_k=1,
+        auto_insert_metric_name=False,
     )
     early_stopping_callback = EarlyStopping(monitor="val_loss", patience=3, verbose=True, mode="min")
     return [checkpoint_callback, early_stopping_callback]
