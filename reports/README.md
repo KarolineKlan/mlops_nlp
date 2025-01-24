@@ -422,7 +422,7 @@ We used the Google Cloud Platform’s compute engine as the basis of running the
 >
 > Answer:
 
-![Artifact registry](figures/Artifact_Registry.png)
+![Artifact registry](figures/Artifact_registry_new.png)
 
 ### Question 21
 
