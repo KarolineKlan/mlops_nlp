@@ -217,7 +217,7 @@ We tried implementing typing to every fuction on our own, however a better pract
 >
 > Answer:
 
-We implemented 5 tests for data.py that primarily test the initialization of the datasets, ensuring that the train, validation, and test datasets are correctly populated and that the embeddings have size 768 and labels meet the expected criteria being 0 or 1. Additionally we implemented a test for model.py that verifys the input and output dimensions of the forwad passes.
+We implemented 5 tests for data.py that primarily test the initialization of the datasets, ensuring that the train, validation, and test datasets are correctly populated and that the embeddings have size 768 and labels meet the expected criteria being 0 or 1. Additionally we implemented a test for model.py that verifys the input and output dimensions of the forwad passes. We also added test for the rest of the files in the source code except train.py.
 
 ### Question 8
 
@@ -232,7 +232,7 @@ We implemented 5 tests for data.py that primarily test the initialization of the
 >
 > Answer:
 
---- question 8 fill here ---
+The total code coverage of our code is 67%, which includes all our source code files except train.py. While achieving 100% code coverage would indicate that every line of code is executed during testing, it does not necessarily mean that the code is error-free. Code coverage primarily measures the extent to which the codebase is tested, but it does not guarantee the quality or accuracy of the tests themselves. Even with high coverage, critical issues might still exist due to untested edge cases. Additionally, external dependencies, unexpected inputs, or integration issues may also introduce errors that are not covered by unit tests. Therefore, while aiming for high coverage is important, ensuring that the tests are meaningful and comprehensive is more critical for building a reliable system.
 
 ### Question 9
 
