@@ -353,7 +353,7 @@ In experiment 2 we run a hyperparameter sweep that tests different batch sizes a
 >
 > Answer:
 
---- question 15 fill here ---
+For our project, we developed a Docker image to containerize the training process, ensuring consistency and portability across different environments. The Dockerfile for the training setup (train.dockerfile) starts with a lightweight Python 3.11-slim base image and installs necessary dependencies, including build tools and Python packages, specified in requirements.txt and requirements_dev.txt. The source code, configuration files, models, and reports are copied into the container, enabling it to execute the training script using the command ´docker run train:latest´. The training script’s parameters, such as hyperparameters and paths, are managed through a centralized configuration file using Hydra, so no arguments are passed directly to the container. Link to dockerfile: [train.dockerfile](https://github.com/KarolineKlan/mlops_nlp/blob/main/dockerfiles/train.dockerfile)
 
 ### Question 16
 
@@ -368,7 +368,7 @@ In experiment 2 we run a hyperparameter sweep that tests different batch sizes a
 >
 > Answer:
 
---- question 16 fill here ---
+Debugging method was dependent on group members. All of us use the visual studio code IDE, and some of the group members were confident in using the built-in debugger to set breakpoints and step through the code. This allowed them to pinpoint the exact locations where errors occurred and inspect variables in real-time. Others relied on print statements. In some files loguro was used to create structured loggings to track the flow of execution. We did not use profiling for this project as efforts were put elsewhere in getting everything working together. However, this approach is beneficial in identifying performance bottlenecks, such as inefficient code blocks, excessive memory usage, or slow-loading data pipelines, and given more time we could have looked into this.
 
 ## Working in the cloud
 
@@ -465,7 +465,9 @@ It should additionally be mentioned that our config_cpu.yaml file includes a WAN
 >
 > Answer:
 
---- question 23 fill here ---
+Using FastAPI we managed to write an API for the model. The API takes an input string, creates the embeddings through the huggingface DistilBERT model, and passes them to the trained model from the model checkpoint saved in the GCP bucket. The output from the API is the classification of the input movie review as either “positive” or “negative.”  
+The API is designed using the lifespan handler such that it loads the used models on startup and performs a cleanup by deleting the embeddings, tokenizers, classifier and device on shutdown. The app uses MPS when available, if not it uses CPU.  
+
 
 ### Question 24
 
@@ -496,7 +498,10 @@ It should additionally be mentioned that our config_cpu.yaml file includes a WAN
 >
 > Answer:
 
---- question 25 fill here ---
+No we did not perform unit testing or load testing on the API due to time constraints. 
+If we were to do so we would implement the unit testing via pytest. These could ensure that the input to the API is correct by checking that the type is “string” or that the model is correctly loaded from from the GCP bucket. 
+For load testing we would use the locust framework to simulate a number of users, and check how the API reponds to this demand, what the average response time is and how many requests per second the API can handle. 
+
 
 ### Question 26
 
@@ -511,7 +516,9 @@ It should additionally be mentioned that our config_cpu.yaml file includes a WAN
 >
 > Answer:
 
-We did not manage to implement monitoring for our deployed model in this project. However, implementing monitoring would allow us to track key metrics such as prediction accuracy, response time, and system resource usage over time, which would providing insights into the health of the system. Additionally, data drifting is a significant issue in machine learning applications, where the distribution of incoming data changes compared to the training data. This can lead to a degradation in model performances. By using frameworks like Evidently, we could detect such drifts early by continuously comparing the input data distributions and model outputs to historical baselines.
+We did not manage to implement monitoring for our deployed model in this project. However, implementing monitoring would allow us to track key metrics such as response time, and system resources usage over time, which would providing insights into the health of the system. 
+For our specific setup detecting data drifting is not very useful as we have all the training and test data available from the beginning. If we tracked all inputs to the API in a database, it would be relevant to detect datadrifting through a framework like Evidently by continuously comparing the input data distributions and model outputs to historical baselines.
+
 
 ## Overall discussion of project
 
@@ -530,7 +537,7 @@ We did not manage to implement monitoring for our deployed model in this project
 >
 > Answer:
 
---- question 27 fill here ---
+During the course of the project, the total credits used amounted to $4.97 worth of Google Cloud credits. The most expensive service was the Container Registry Vulnerability Scanning, which accounted for $3.38. The Compute Engine and Vertex AI incurred costs of $1.32 and $0.08, respectively. Because our projecs is able to train faily fast on CPU and using the Vertex AI means that the compute is automatically turned on when used and off when not used, resulted in not spending all $50 credits. If instead we had chosen to setup and train on a GPU the cost would likely have been higher. 
 
 ### Question 28
 
@@ -546,7 +553,7 @@ We did not manage to implement monitoring for our deployed model in this project
 >
 > Answer:
 
-No :)
+No - we looked into trying to make a front-end but did not manage witin the timeframe :)
 
 ### Question 29
 
@@ -563,6 +570,8 @@ No :)
 >
 > Answer:
 
+![MLOps_pipeline](figures/MLOps_Pipeline.png)
+
 The local setup (squared box):
 The initial repo was setup using the cookie cutter template. TThe source code is organized within the src/ folder and includes key functionalities like data preprocessing using HuggingFace Transformers’ DistilBERT model. This model generates embeddings from the IMDB dataset, which is loaded via the PyTorch torchvision.datasets module.
 The local development environment integrates several tools:
@@ -576,7 +585,7 @@ Once code changes are committed and pushed to GitHub, GitHub Actions is triggere
 - Unit tests with Pytest.
 - Dependabot to check and bump package versions for consistent dependency management.
 
-The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines.
+The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines. Fast API enables to access the models in the bucket serves as the interface for running inference on the trained classifier.
 
 
 ### Question 30
@@ -591,7 +600,7 @@ The processed embeddings and models are saved in a Google Cloud Storage Bucket. 
 >
 > Answer:
 
-The biggest struggle of the project has been to get every different aspects of the project and packages/components working together. Weights and Biases authentications has been a struggle when getting the API keys working in the cloud and in a collaborative team. Being many people working on different parts resulted in frequent conflicts when merging branches and it required significant coordination and comunication when managing who was working on which parts. Additionally, deploying the project to the cloud introduced issues with a lot of different authentications across different services - especially getting the cloud trigger up and running correctly with github and getting the Vertex AI engine runnning using the artifacts. Managing credentials while ensuring security and accessibility for the team, required extra effort trying to navigate in a totally new user interface. The slow build times of the Docker images also presented a significant challenge during the project. This issue often disrupted our workflow, particularly when frequent iterations or debugging were needes. Each small adjustment to the Docker configuration or application code resulted in extended waiting times.
+The biggest struggle of the project has been to get every different aspects of the project and packages/components working together. Weights and Biases authentications has been a struggle when getting the API keys working in the cloud and in a collaborative team. Being many people working on different parts resulted in frequent conflicts when merging branches and it required significant coordination and comunication when managing who was working on which parts. Additionally, deploying the project to the cloud introduced issues with a lot of different authentications across different services - especially getting the cloud trigger up and running correctly with github and getting the Vertex AI engine runnning using the artifacts. Managing credentials while ensuring security and accessibility for the team, required extra effort trying to navigate in a totally new user interface. The slow build times of the Docker images also presented a significant challenge during the project as it often disrupted our workflow, particularly when frequent iterations or debugging were needed. Each small adjustment to the Docker configuration or application code resulted in extended waiting times.
 Lastly we struggled managing to implement every part of the course curriculum. Lastly, we faced challenges in fully implementing every aspect of the course curriculum. Time constraints, in particular, limited our ability to incorporate all the content covered in week 3.
 
 ### Question 31
@@ -618,7 +627,7 @@ Student s214696 was in charge of the evaluation confusion matrix script, working
 
 s204052 has contributed a lot to the source code scrips including train.py and data.py as well as setting up WandB project team, handeling all of the DVC by creating buckets and making sure config files tracks the versions of the data, added the pre-commit-hooks and participated in the report writing and added the documentations.
 
-s214609 has also contributed to the source code scripts especially data.py, model and train. The student was in charge of developing the unit-tests and making of the github actions as well as the coverage, helping getting the API working and created a front end for the application.
+s214609 has also contributed to the source code scripts especially data.py, model and train. The student was in charge of developing the unit-tests and making of the github actions as well as the coverage, helping getting the API working and worked on trying to create a front end for the application.
 
 s214596 also contriuted a lot to the source code especially the model.py script, has worked on setting up the docker-files and cloud build, and has worked on setting up the API and creating the cloud function for the deployment to the end user as well as creating tasks.py.
 
