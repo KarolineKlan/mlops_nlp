@@ -81,8 +81,8 @@ will check the repositories and the code to verify your answers.
 * [x] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [ ] Create a trigger workflow for automatically building your docker images (M21)
+* [x] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [x] Create a trigger workflow for automatically building your docker images (M21)
 * [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
 * [ ] Create a FastAPI application that can do inference using your model (M22)
 * [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
@@ -104,12 +104,12 @@ will check the repositories and the code to verify your answers.
 
 ### Extra
 
-* [ ] Write some documentation for your application (M32)
+* [x] Write some documentation for your application (M32)
 * [ ] Publish the documentation to GitHub Pages (M32)
 * [ ] Revisit your initial project description. Did the project turn out as you wanted?
-* [ ] Create an architectural diagram over your MLOps pipeline
-* [ ] Make sure all group members have an understanding about all parts of the project
-* [ ] Uploaded all your code to GitHub
+* [x] Create an architectural diagram over your MLOps pipeline
+* [x] Make sure all group members have an understanding about all parts of the project
+* [x] Uploaded all your code to GitHub
 
 ## Group information
 
@@ -198,7 +198,7 @@ We used most of the cookiecutter template. The nlp-model-specific code including
 > Answer:
 
 We implemented a pre-commit hook that automatically run the linting step ruff --fix and ruff --formatter before comitting any code. We thought it was a nice thing to introduce in a precommit to ensure that all code pushed to the repo in would be nicely formatted following best practice linting rules. By using linting rules at the pre-commit stage, you ensure that all developers adhere to the same coding standards before code is committed. This maintains a consistent codebase and reduces the load on the CI system. 
-We tried implementing typing to every fuction on our own, however a better practice than that would be to use a package like mypy for static type checking. This helps catch type-related errors early and improves code readability and maintainability. We have looked into using the MKdocs to create documentation for the project. We did not manage to make it work within the time-frame, however this is really important to have when working on larger project for knowledge sharing, onboarding of new employees, consistecy and maintanance among other things.
+We tried implementing typing to every fuction on our own, however a better practice than that would be to use a package like mypy for static type checking. This helps catch type-related errors early and improves code readability and maintainability. We used the MKdocs package to create documentation for the project. We made it work and documented the train.py code and the data.py code however more time was not priotized  on making it fully publicible. In the real world this is really important to have when working on larger project for knowledge sharing, onboarding of new employees, consistecy and maintanance among other things.
 
 ## Version control
 
@@ -334,7 +334,10 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
-
+As seen in the first image we are logging a vararity of things when running experiments into a wandb_project called "dtu_mlops" and a wandb_team called "spicy-mlops". The first experiment is a simple run training the model for 10 epochs, logging standard graphs such as training loss, validation loss as well as train accuracy and validation accuracy. By tracking training and validation loss, we can see how well the model is learning and if it is overfitting or underfitting, and doing it in wandb makes it easy to share with collaborators. We are also logging test-metrics and custom graphs being a confusion matrix for each run as well as a t-SNE visualization of the embeddings collected from the last layer in the network to visually represent the partitioning of the two classes.
+![Experiment 1 - Workspace screenshot](figures/WandB_Workspace_Exp1.png)
+We also demonstrate how easy it is to share specific run logs by creating a simple report: [Experiment 1 - example W&B report](https://api.wandb.ai/links/spicy-mlops/i1mo1c04)
+In experiment 2 we run a hyperparameter sweep that tests different batch sizes and learning rates. From image 2 we see that batch size affects the modelperformance a bit more than learning rate, as we get lower validatoion loss using batchsize 32 than 64 for example:
 ![Experiment 2 - hyperparameter sweep](figures/WandB_Sweep_Exp2.png)
 
 ### Question 15
@@ -382,7 +385,11 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 17 fill here ---
+We used the following services:
+- **cloud bucket**: that stores the preprocessed data embeddings as well as the saved model.
+- **cloud build**: is automatically triggered when someone pushes to the main branch, and then is builds an docker image and saves it in the artifact registry. 
+- **Artifact registry**: stores the Docker images built by Cloud Build. It acts as a centralized repository for our container images, making it easy to manage and deploy them across different environments.
+- **Vertex AI**: Vertex AI uses virtual machines to provide the computational resources needed for training and deploying the machine learning model. 
 
 ### Question 18
 
@@ -406,7 +413,7 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 19 fill here ---
+![The Buckets](figures/Bucket.png)
 
 ### Question 20
 
@@ -415,7 +422,7 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 20 fill here ---
+![Artifact registry](figures/Artifact_registry.png)
 
 ### Question 21
 
@@ -424,7 +431,7 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 21 fill here ---
+![Trigger cloud build history](figures/Build_History.png)
 
 ### Question 22
 
@@ -502,7 +509,7 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 26 fill here ---
+We did not manage to implement monitoring for our deployed model in this project. However, implementing monitoring would allow us to track key metrics such as prediction accuracy, response time, and system resource usage over time, which would providing insights into the health of the system. Additionally, data drifting is a significant issue in machine learning applications, where the distribution of incoming data changes compared to the training data. This can lead to a degradation in model performances. By using frameworks like Evidently, we could detect such drifts early by continuously comparing the input data distributions and model outputs to historical baselines.
 
 ## Overall discussion of project
 
@@ -537,7 +544,7 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 28 fill here ---
+No :)
 
 ### Question 29
 
@@ -554,7 +561,21 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 29 fill here ---
+The local setup (squared box):
+The initial repo was setup using the cookie cutter template. TThe source code is organized within the src/ folder and includes key functionalities like data preprocessing using HuggingFace Transformers’ DistilBERT model. This model generates embeddings from the IMDB dataset, which is loaded via the PyTorch torchvision.datasets module.
+The local development environment integrates several tools:
+- Hydra is used to manage configurations for data paths, model hyperparameters, and other settings.
+- Weights & Biases (W&B) logs experiment metrics and manages hyperparameter sweeps.
+- Conda is used for managing Python dependencies in a virtual environment.
+- Docker containerizes the project, ensuring consistent environments across local and cloud setups.
+- A pre-commit hook runs tools like Ruff to ensure code quality and formatting before committing.
+
+Once code changes are committed and pushed to GitHub, GitHub Actions is triggered (cloud box on the right). It runs:
+- Unit tests with Pytest.
+- Dependabot to check and bump package versions for consistent dependency management.
+
+The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines.
+
 
 ### Question 30
 
@@ -568,7 +589,8 @@ We also save the preprocessed data along with a data_config.yaml file that track
 >
 > Answer:
 
---- question 30 fill here ---
+The biggest struggle of the project has been to get every different aspects of the project and packages/components working together. Weights and Biases authentications has been a struggle when getting the API keys working in the cloud and in a collaborative team. Being many people working on different parts resulted in frequent conflicts when merging branches and it required significant coordination and comunication when managing who was working on which parts. Additionally, deploying the project to the cloud introduced issues with a lot of different authentications across different services - especially getting the cloud trigger up and running correctly with github and getting the Vertex AI engine runnning using the artifacts. Managing credentials while ensuring security and accessibility for the team, required extra effort trying to navigate in a totally new user interface. The slow build times of the Docker images also presented a significant challenge during the project. This issue often disrupted our workflow, particularly when frequent iterations or debugging were needes. Each small adjustment to the Docker configuration or application code resulted in extended waiting times.
+Lastly we struggled managing to implement every part of the course curriculum. Lastly, we faced challenges in fully implementing every aspect of the course curriculum. Time constraints, in particular, limited our ability to incorporate all the content covered in week 3.
 
 ### Question 31
 
@@ -586,4 +608,16 @@ We also save the preprocessed data along with a data_config.yaml file that track
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+All members in the group participated equally to the project!
+
+Student s214638 was in charge of setting up the initial cookie cutter project as well as creating a collaborative project in the cloud, making the cloud trigger, working on the visualization script, accepting pull-requests, filling out many of the report questions taking screenshots and creating the MLOps pipeline image.
+
+Student s214696 was in charge of the evaluation confusion matrix script, working on the WandB sweep and in general a lot in the logging in WandB, expanded the confic to handle multiple experiments, and getting the Vertex AI engine running and answering question in the report. 
+
+s204052 has contributed a lot to the source code scrips including train.py and data.py as well as setting up WandB project team, handeling all of the DVC by creating buckets and making sure config files tracks the versions of the data, added the pre-commit-hooks and participated in the report writing and added the documentations.
+
+s214609 has also contributed to the source code scripts especially data.py, model and train. The student was in charge of developing the unit-tests and making of the github actions as well as the coverage, helping getting the API working and created a front end for the application.
+
+s214596 also contriuted a lot to the source code especially the model.py script, has worked on setting up the docker-files and cloud build, and has worked on setting up the API and creating the cloud function for the deployment to the end user as well as creating tasks.py.
+
+We have used generative AI tools (both Github Copilot and ChatGPT) for parts of the code, and for debugging issues. 
