@@ -483,7 +483,15 @@ The API is designed using the lifespan handler such that it loads the used model
 >
 > Answer:
 
---- question 24 fill here ---
+We choose to deploy the API in the cloud. This was done by creating a docker container in the GCP artifact registry and deploying a service via cloud run. 
+To use the API an end user can access the simple UI through the docs page of the API through the link below: 
+
+[Try it out here!](https://api-inf-445894047907.europe-west1.run.app/docs#/default/inference_review__post)
+
+The user can then input the movie review and get the classification whether it was positive or negative. 
+Using the docs page is an easy way to test our API but if we had more time we would have liked to make a frontend to make the API more accessible and easier to use for the user using a streamlit application
+
+
 
 ### Question 25
 
@@ -627,7 +635,7 @@ Student s214696 was in charge of the evaluation confusion matrix script, working
 
 s204052 has contributed a lot to the source code scrips including train.py and data.py as well as setting up WandB project team, handeling all of the DVC by creating buckets and making sure config files tracks the versions of the data, added the pre-commit-hooks and participated in the report writing and added the documentations.
 
-s214609 has also contributed to the source code scripts especially data.py, model and train. The student was in charge of developing the unit-tests and making of the github actions as well as the coverage, helping getting the API working and worked on trying to create a front end for the application.
+s214609 has also contributed to the source code scripts especially data.py, model and train. The student was in charge of developing the unit-tests and making of the github actions as well as the coverage, helping getting the API working and worked on trying to create a front end for the application, though we did not manage at this point.
 
 s214596 also contriuted a lot to the source code especially the model.py script, has worked on setting up the docker-files and cloud build, and has worked on setting up the API and creating the cloud function for the deployment to the end user as well as creating tasks.py.
 
