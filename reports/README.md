@@ -83,9 +83,9 @@ will check the repositories and the code to verify your answers.
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
 * [x] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
 * [x] Create a trigger workflow for automatically building your docker images (M21)
-* [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [ ] Create a FastAPI application that can do inference using your model (M22)
-* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [x] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [x] Create a FastAPI application that can do inference using your model (M22)
+* [x] Deploy your model in GCP using either Functions or Run as the backend (M23)
 * [ ] Write API tests for your application and setup continues integration for these (M24)
 * [ ] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
@@ -106,7 +106,7 @@ will check the repositories and the code to verify your answers.
 
 * [x] Write some documentation for your application (M32)
 * [ ] Publish the documentation to GitHub Pages (M32)
-* [ ] Revisit your initial project description. Did the project turn out as you wanted?
+* [x] Revisit your initial project description. Did the project turn out as you wanted?
 * [x] Create an architectural diagram over your MLOps pipeline
 * [x] Make sure all group members have an understanding about all parts of the project
 * [x] Uploaded all your code to GitHub
@@ -182,7 +182,7 @@ We use requirements files to manage packages via. conda for running the training
 >
 > Answer:
 
-We used most of the cookiecutter template. The nlp-model-specific code including data preprocessing, training and visualizations are in the src/nlp folder. The only folder we have removed is the notebooks folder. We have extended the config implementation to have several config files for different experiments, one that runs a simple fast experiment (exp1) and one that runs a hyperparameter tuning sweep of the model parameters (exp2). Furthermore, as data version control we save a data_config file with our preprocessed data to always be sure what data we are using for specific experiments in regards to the seed and size. There are some API-specific files that we had added because the intention was to use them for deploying the model using the API - but because of a lot of debugging in the cloud we did not manage to get this far with our project setup, meaning that these files are empty.
+We used most of the cookiecutter template. The nlp-model-specific code including data preprocessing, training and visualizations are in the src/nlp folder. The only folder we have removed is the notebooks folder. We have extended the config implementation to have several config files for different experiments, one that runs a simple fast experiment (exp1) and one that runs a hyperparameter tuning sweep of the model parameters (exp2). Furthermore, as data version control we save a data_config file with our preprocessed data to always be sure what data we are using for specific experiments in regards to the seed and size. There is a test_script for the API files that we had added because the intention was to use it for testing the API - but because of a lot of debugging in the cloud we did not manage to get this far with our project setup, meaning that this file is empty.
 
 ### Question 6
 
@@ -262,7 +262,7 @@ We used branches and pull requests extensively. Since we worked concurrently on 
 >
 > Answer:
 
---- We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable. Additionally the embedded data is pushed to a cloud bucket for easier acess from the other cloud services. As a part of this process the classic DVC package was initialized, but it was not used henceforth.---
+We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable. Additionally the embedded data is pushed to a cloud bucket for easier acess from the other cloud services. As a part of this process the classic DVC package was initialized, but it was not used henceforth.
 
 ### Question 11
 
@@ -422,7 +422,7 @@ We used the Google Cloud Platform’s compute engine as the basis of running the
 >
 > Answer:
 
-![Artifact registry](figures/Artifact_registry.png)
+![Artifact registry](figures/Artifact_registry_new.png)
 
 ### Question 21
 
@@ -486,7 +486,7 @@ The API is designed using the lifespan handler such that it loads the used model
 We choose to deploy the API in the cloud. This was done by creating a docker container in the GCP artifact registry and deploying a service via cloud run. 
 To use the API an end user can access the simple UI through the docs page of the API through the link below: 
 
-[Try it out here!](https://api-inf-445894047907.europe-west1.run.app/docs#/default/inference_review__post)
+[Try it out here!](https://api-inf-get-445894047907.europe-west1.run.app/docs#/default/inference_review__get)
 
 The user can then input the movie review and get the classification whether it was positive or negative. 
 Using the docs page is an easy way to test our API but if we had more time we would have liked to make a frontend to make the API more accessible and easier to use for the user using a streamlit application
@@ -593,7 +593,7 @@ Once code changes are committed and pushed to GitHub, GitHub Actions is triggere
 - Unit tests with Pytest.
 - Dependabot to check and bump package versions for consistent dependency management.
 
-The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines. Fast API enables to access the models in the bucket serves as the interface for running inference on the trained classifier.
+The processed embeddings and models are saved in a Google Cloud Storage Bucket. A trigger is setup to start cloud build when anything is pushed to the main branch and then the images are saved into the artifact registry. These artifacts can be deployed to Vertex AI that utilizes the embeddings to train the models using virtual machines. Fast API enables access to the models in the bucket which serves as the interface for running inference on the trained classifier - as also seen in the ealier question.
 
 
 ### Question 30
