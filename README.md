@@ -90,10 +90,10 @@ The directory structure of the project looks like this:
 │   └── workflows/
 │       └── tests.yaml
 ├── configs/                  # Configuration files
-|   ├── config.yaml           # Wrapper config which is always called, experiment is given as argument
-|   ├── cloudbuild.yaml
+│   ├── config.yaml           # Wrapper config which is always called, experiment is given as argument
+│   ├── cloudbuild.yaml
 │   └── experiment/           # Specific config for each experiment
-|       ├── exp1.yaml
+│       ├── exp1.yaml
 │       └── exp2.yaml
 ├── dockerfiles/              # Dockerfiles
 │   ├── api.Dockerfile
@@ -101,8 +101,8 @@ The directory structure of the project looks like this:
 ├── docs/                     # Documentation
 │   ├── mkdocs.yml
 │   └── source/
-|       ├── index.md
-|       ├── model.md
+│       ├── index.md
+│       ├── model.md
 │       └── train.md
 ├── models/                   # Temporary folder for trained models, main storage is in a GCP bucket
 ├── reports/                  # Reports
