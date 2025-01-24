@@ -7,4 +7,4 @@ workerPoolSpecs:
         imageUri: europe-west1-docker.pkg.dev/mlops-nlp-cloud/training-repo/train:latest
         env:
         - name: WANDB_API_KEY
-          value: gcp:secretmanager:projects/mlops-nlp-cloud/secrets/MY_WANDB_KEY
+          value: <your_api_key>
