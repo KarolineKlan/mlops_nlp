@@ -90,7 +90,14 @@ To use pre-commit checks run the following line:
 - ```pre-commit install```
 
 ### Instructions to deploy API
-***Missing instructions***
+To access the API docs, write the following link:
+https://api-inf-get-445894047907.europe-west1.run.app/docs
+
+To run the inference API via curl run the command with an arbitrary string as input.
+EXAMPLE with input_string: "it was a bad movie":
+curl -X 'GET' \
+  'https://api-inf-get-445894047907.europe-west1.run.app/review/?input_string=it%20was%20a%20bad%20movie' \
+  -H 'accept: application/json'
 
 ## Project structure
 
