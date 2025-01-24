@@ -6,6 +6,14 @@ from torch import nn, optim
 
 
 class nlpModel(LightningModule):
+    """Basic shallow neural network class.
+
+    Args:
+        input_dim: number of input features, if using bert embeddings it will be 768
+        config: model configuration, only settings regarding dropout is used
+
+    """
+
     def __init__(self, input_dim: int, config: DictConfig):
         super(nlpModel, self).__init__()
         self.config = config

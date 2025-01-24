@@ -6,7 +6,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
 from torch.utils.data import DataLoader
 
-from data import EmbeddingDataset
+from nlp.data import EmbeddingDataset
 from nlp.model import nlpModel
 
 
@@ -17,14 +17,6 @@ def evaluate(cfg: DictConfig, test_loader: DataLoader) -> None:
     )
     model.eval()
 
-    dataset = EmbeddingDataset(
-        model_name=cfg["data"]["model_name"],
-        embedding_save_dir=cfg["data"]["data_path"],
-        size=cfg["data"]["train_size"],
-        seed=cfg["data"]["data_seed"],
-        test_ratio=cfg["data"]["test_ratio"],
-        val_ratio=cfg["data"]["val_ratio"],
-    )
     true_labels = []
     predictions = []
 

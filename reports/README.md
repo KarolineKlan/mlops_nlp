@@ -143,7 +143,10 @@ s214638, s204052, s214596, 	s214609, s214696
 >
 > Answer:
 
-We used the transformers package from hugging face to do preprocessing on our data. More specifically we used the "distilbert-base-uncased" model including the appropriate tokenizer to create embeddings of the text data. These embeddings were then saved in the "data/processed" directory.
+We used the transformers package from hugging face to do preprocessing on our data. More specifically we used the "distilbert-base-uncased" model including the appropriate tokenizer to create embeddings of the text data. These embeddings were then saved in the "data/processed" directory. Using this model to get embeddings of the text from the IMDb dataset enable to effectively capture the semantic meaning of the text and this made it possible to make a very simple classifier with only two layers and still get a fairly high accuracy score. Furthermore, the use of pre-trained models significantly reduced the computational resources and time required for training leaving us to focus more on the implementations of the MLOps related stuff.
+
+
+
 
 ## Coding environment
 
@@ -163,7 +166,7 @@ We used the transformers package from hugging face to do preprocessing on our da
 >
 > Answer:
 
-We use requirements files to manage packages for running the training code and to develop on the project. A developer would need to pip install both the "requirements.txt" and "requirements_dev.txt". In the readme, there is a step-by-step instruction for running the code, consisting of installing invoke and invoking a "Create environment"-task and "Install requirements"-task. This installs both requirements files. Hereafter one needs to run "pre-commit install" to activate pre-commits. Furthermore, we have also created docker images with docker files that are deployed in the cloud.
+We use requirements files to manage packages via. conda for running the training code and to develop on the project. A developer would need to first clone the repository and then pip install both the "requirements.txt" and "requirements_dev.txt". In the readme, there is a step-by-step instruction for running the code, consisting of installing invoke and invoking a "Create environment"-task and "Install requirements"-task. This installs both requirements files. Hereafter one needs to run "pre-commit install" to activate pre-commits. Furthermore, we have also created docker images with docker files that are deployed in the cloud, which enables a consistent and reproducible environment for all developers. In these docker files the environments are also setup uding the requirements files. Setting it up like this ensure that environments on different computers/setups are identical, reducing the chance of issures related to specific package versions etc.
 
 ### Question 5
 
@@ -179,7 +182,7 @@ We use requirements files to manage packages for running the training code and t
 >
 > Answer:
 
-We used most of the cookiecutter template. The only folder we have removed is the notebooks folder. We have extended the config implementation to have several config files for different experiments. Furthermore, as data version control we save a data_config file with our preprocessed data to always be sure what data we are using for specific experiments.
+We used most of the cookiecutter template. The nlp-model-specific code including data preprocessing, training and visualizations are in the src/nlp folder. The only folder we have removed is the notebooks folder. We have extended the config implementation to have several config files for different experiments, one that runs a simple fast experiment (exp1) and one that runs a hyperparameter tuning sweep of the model parameters (exp2). Furthermore, as data version control we save a data_config file with our preprocessed data to always be sure what data we are using for specific experiments in regards to the seed and size. There are some API-specific files that we had added because the intention was to use them for deploying the model using the API - but because of a lot of debugging in the cloud we did not manage to get this far with our project setup, meaning that these files are empty.
 
 ### Question 6
 
@@ -194,7 +197,8 @@ We used most of the cookiecutter template. The only folder we have removed is th
 >
 > Answer:
 
---- question 6 fill here ---
+We implemented a pre-commit hook that automatically run the linting step ruff --fix and ruff --formatter before comitting any code. We thought it was a nice thing to introduce in a precommit to ensure that all code pushed to the repo in would be nicely formatted following best practice linting rules. By using linting rules at the pre-commit stage, you ensure that all developers adhere to the same coding standards before code is committed. This maintains a consistent codebase and reduces the load on the CI system. 
+We tried implementing typing to every fuction on our own, however a better practice than that would be to use a package like mypy for static type checking. This helps catch type-related errors early and improves code readability and maintainability. We have looked into using the MKdocs to create documentation for the project. We did not manage to make it work within the time-frame, however this is really important to have when working on larger project for knowledge sharing, onboarding of new employees, consistecy and maintanance among other things.
 
 ## Version control
 
@@ -213,7 +217,7 @@ We used most of the cookiecutter template. The only folder we have removed is th
 >
 > Answer:
 
---- question 7 fill here ---
+We implemented 5 tests for data.py that primarily test the initialization of the datasets, ensuring that the train, validation, and test datasets are correctly populated and that the embeddings have size 768 and labels meet the expected criteria being 0 or 1. Additionally we implemented a test for model.py that verifys the input and output dimensions of the forwad passes.
 
 ### Question 8
 
@@ -243,7 +247,7 @@ We used most of the cookiecutter template. The only folder we have removed is th
 >
 > Answer:
 
-We used branches and pull requests extensively. Since we worked concurrently on the project we created separate branches for coding different sections of the project. When a branch for development was done and tested, we merged it into main. This made it possible for us to always have working code even when fixing multiple issues at the same time. Furthermore, if issues arose we could go back to a previous version where the code was running seamlessly.
+We used branches and pull requests extensively. Since we worked concurrently on the project we created separate branches for coding different sections of the project. We had one branch called development, and then treated our main branch as the production branch. When a branch for development was done and tested, we merged it into main. This made it possible for us to always have working code even when fixing multiple issues at the same time. We opened new branches for new features being developed such as visulization add ons, dockerimagebuild and report writing - just to mention a few of the examples. Furthermore, if issues arose we could go back to a previous version where the code was running seamlessly.
 
 ### Question 10
 
@@ -258,7 +262,7 @@ We used branches and pull requests extensively. Since we worked concurrently on 
 >
 > Answer:
 
-We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable.
+--- <span style="color: red;"> We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable. </span> ---
 
 ### Question 11
 
@@ -275,7 +279,9 @@ We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept 
 >
 > Answer:
 
---- question 11 fill here ---
+For our continuous integration setup we have, as previously also described, a pre-commit-hook that check the following linting steps before comitting: trailing-whitespace, end-of-file-fixer, check-yaml, check-added-large-files, ruff-fix and ruff-format. This is done every time a commit added to the main branch. Besides this we have made a unittest workflow that runs the unit-tests on three different operating systems and two different python versions. Besides this, we have made a unittest workflow that runs the unit tests on three different operating systems (Windows, macOS, and Ubuntu) and two different Python versions (3.11 and 3.12). This ensures that our code is compatible across multiple environments. We also use caching to speed up our CI workflows. For eksample, we cache the dependencies installed via pip to avoid re-downloading them on every run. A successful run can be seen [here](https://github.com/KarolineKlan/mlops_nlp/actions/runs/12930549267).
+Additionally we have setup a trigger in the cloud that when pushing something to the main branch it automatically builds a new docker image in the artifact registry. 
+Lastly the dependabot.yaml file configures Dependabot to automatically check for updates to Python dependencies managed by pip and GitHub Actions workflows. It is set to run these checks monthly and will create pull requests for any update it finds. This helps ensure that your project dependencies remain up to date and secure.
 
 ## Running code and tracking experiments
 
@@ -294,8 +300,8 @@ We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept 
 >
 > Answer:
 
-We use hydra to parse a config file into a training function. The config files are located in a configs folder and contain an overall config file and several experiment config files. Depending on an experiment argument parsed in the command line the appropriate experiment configurations are loaded. An example usage is:
-```**Write here**```
+ We use hydra to parse a config file into a training function. The config files are located in a configs folder and contain an overall config file and several experiment config files. Depending on an experiment argument parsed in the command line the appropriate experiment configurations are loaded. An example usage is:
+```invoke train``` which runs a simple experiment using the excact specified hyper-parameters in exp1.yaml file. Running the command```invoke train --experiment=exp2``` will run an experiment doing hyper-parameter sweep on W&B.
 
 ### Question 13
 
@@ -310,7 +316,8 @@ We use hydra to parse a config file into a training function. The config files a
 >
 > Answer:
 
-The config is always passed to wandb and is saved with each run. So we can always see exaclty which hyperparameters and data configurations produced the experiment results by inspecting the wandb run. To reproduce the experiment one would have to copy the configurations into a config file in the configs/experiment folder and call the experiment when invoking the training.
+The config is always passed to weights and biases project and is saved with each run. So we can always see exaclty which hyperparameters and data configurations produced the experiment results by inspecting the wandb run. To reproduce the experiment one would have to copy the configurations into a config file in the configs/experiment folder and call the experiment when invoking the training. Additionally a seed should always be set in order to ensure that any random processes are reproducible.
+We also save the preprocessed data along with a data_config.yaml file that tracks the size and seed used. This way, we can skip preprocessing if consecutive trainings use the same dataset, ensuring that the same data is used acrosss different runs. This setup ensures that no information is lost and that experiments can be reliably reproduced.
 
 ### Question 14
 

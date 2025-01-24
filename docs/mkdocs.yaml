@@ -19,5 +19,9 @@ plugins:
             separate_signature: true
             show_signature_annotations: true
 
+
+
 nav:
   - Home: index.md
+  - Model: model.md
+  - Train: train.md
