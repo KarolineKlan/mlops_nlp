@@ -262,7 +262,7 @@ We used branches and pull requests extensively. Since we worked concurrently on 
 >
 > Answer:
 
---- <span style="color: red;"> We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable. </span> ---
+--- We used a sort of "homemade" DVC. We trained on subsets of the dataset and kept track on which data was being used by tracking the size and seed used to extract the subset. Our data pipeline included preprocessing the data and saving these embeddings along with a data_config.yaml file tracking the size and seed. This way we can skip preprocessing every time if the consequtive trainings use the same data set. If we did not do this, there would be no way to reproduce a training and the results of the project would be unreliable. Additionally the embedded data is pushed to a cloud bucket for easier acess from the other cloud services. As a part of this process the classic DVC package was initialized, but it was not used henceforth.---
 
 ### Question 11
 
@@ -404,7 +404,7 @@ We used the following services:
 >
 > Answer:
 
---- question 18 fill here ---
+We used the Google Cloud Platform’s compute engine as the basis of running the training in the cloud through Vertex AI which will be explained in further detail in a later question. For this we used a virtual machine of machine type n1-highmem-2 ( 2 vCPUs and 13 GB of memory). The virtual machine has a replica count of 1 meaning it uses a single instance for the job.  This is a cost effective virtual machine that is sufficient for the lightweight training we are using it for. For harder training jobs or larger hyperparameter sweeping, one could choose to use a virtual machine with higher class CPUs or GPUs.
 
 ### Question 19
 
@@ -446,7 +446,9 @@ We used the following services:
 >
 > Answer:
 
---- question 22 fill here ---
+To train our model in the cloud we used Vertex AI such that we through one custom job can train the model in the cloud. The custom job does the following: Creates the specific virtual machine we want, which is specified in the config file config_cpu.yaml, and start the virtual machine. Loads the latest docker container (automatically build through a trigger each time updates are pushed to our main branch) from our artifact registry.  Finally, it runs everything and uploads all results to WANDB. 
+It should additionally be mentioned that our config_cpu.yaml file includes a WANDB API key to authenticate WANDB. For better practice, this could be done through the gcp secrets manager. 
+
 
 ## Deployment
 
