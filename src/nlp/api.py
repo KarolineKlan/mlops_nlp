@@ -2,8 +2,9 @@ from contextlib import asynccontextmanager
 
 import torch
 from fastapi import FastAPI, File, UploadFile
-from pytorch_lightning import load_model
 from transformers import AutoModel, AutoTokenizer
+
+from nlp.model import nlpModel
 
 
 @asynccontextmanager
@@ -13,7 +14,7 @@ async def lifespan(app: FastAPI):
     print("Loading model")
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
     embedding = AutoModel.from_pretrained("distilbert-base-uncased")
-    classifier = load_model("models/SimpleModel.ckpt")
+    classifier = nlpModel.load_from_checkpoint("models/SimpleModel.ckpt")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     embedding.to(device)
     # gen_kwargs = {"max_length": 16, "num_beams": 8, "num_return_sequences": 1}
@@ -27,6 +28,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
+
+
 @app.post("/review/")
 async def inference(input_string: str = "it was a bad movie"):
     """Infer semantics given a IMDB review."""
@@ -34,5 +40,5 @@ async def inference(input_string: str = "it was a bad movie"):
     inputs.to(device)
     with torch.no_grad():
         bert_embedding = embedding(**inputs)
-        output = classifier(bert_embedding.pooler_output)
+        output = classifier(bert_embedding)
     return output
