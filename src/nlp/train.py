@@ -1,3 +1,4 @@
+import netrc
 import os
 
 import hydra
@@ -109,6 +110,11 @@ def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
     Returns:
         None
     """
+    netrc_path = os.path.expanduser("~/.netrc")
+    if not os.path.exists(netrc_path):
+        wandb_api_key = os.getenv("WANDB_API_KEY ")
+        wandb.login(key=wandb_api_key)
+
     if cfg["trainer"]["sweep"]:
         with wandb.init(config=cfg):
             config = wandb.config
