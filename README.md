@@ -19,7 +19,7 @@ Git and this repository has been used for version control throughout the project
 The dockerfiles folder contains a `train.dockerfile` that is used to create an image which is stored in a cloud bucket. Everytime a change is made to this repo (main branch), a new image is made in the cloud due to a trigger. Vertex AI has been set up to use this image to create a container for training the shallow classification model. The training loop connects to the publicly available data embeddings bucket. If the config requests a different amount of data or a different seed for choosing the subset of data, the code automatically comuptes new embeddings and push them to the cloud bucket overriding the existing embeddings. This flow is created under the assumption that different amounts of data are seldom required.
 
 ### Deployment
-We use Fast-API ***Missing text***
+We use Fast-API to create a backend inference app. The app is deployed on Google Cloud Run. The app is a simple API that takes a string as input and returns a 'positive'/'negative' label along with a softmax value return from the model. The app is containerized using a `api.dockerfile` and pushed to the cloud bucket. The cloud run service is set up to use this image.
 
 
 
