@@ -1,3 +1,6 @@
+import netrc
+import os
+
 import hydra
 import torch
 from loguru import logger
@@ -23,12 +26,6 @@ def define_callbacks(filename):
 
 
 def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
-    if cfg["trainer"]["sweep"]:
-        with wandb.init(config=cfg):
-            config = wandb.config
-            cfg["data"]["batch_size"] = sweep_config.batch_size
-            cfg["model"]["learning_rate"] = sweep_config.learning_rate
-
     """Train a nlp shallow model to classify text embedded with BERT into two categories.
     Arguments:
         embedding_save_path {str} -- Path to the embeddings file
@@ -40,6 +37,17 @@ def train_nlp_model(cfg: DictConfig, sweep_config=None) -> None:
     Returns:
         None
     """
+    netrc_path = os.path.expanduser("~/.netrc")
+    if not os.path.exists(netrc_path):
+        wandb_api_key = os.getenv("WANDB_API_KEY")
+        wandb.login(key=wandb_api_key)
+
+    if cfg["trainer"]["sweep"]:
+        with wandb.init(config=cfg):
+            config = wandb.config
+            cfg["data"]["batch_size"] = sweep_config.batch_size
+            cfg["model"]["learning_rate"] = sweep_config.learning_rate
+
     logger.info("Initializing the dataset...")
     seed_everything(cfg["trainer"]["train_seed"])
 
